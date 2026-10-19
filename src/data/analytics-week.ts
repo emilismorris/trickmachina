@@ -37,6 +37,12 @@ const PLACES: Record<string, { city: string; lat: number; lng: number }> = {
   Finland: { city: "Helsinki", lat: 60.1699, lng: 24.9384 },
 };
 
+/** Cities from the Analytics realtime view that are not the country stand-in. */
+const EXTRA_CITIES: MapPin[] = [
+  { ip: "San Jose", hits: 1, lat: 37.3382, lng: -121.8863, place: "San Jose, United States" },
+  { ip: "Vilnius", hits: 1, lat: 54.6872, lng: 25.2797, place: "Vilnius, Lithuania" },
+];
+
 export type MapPin = {
   ip: string;
   hits: number;
@@ -115,5 +121,8 @@ export function pinsWithWeek(pins: MapPin[], countries: Metric[]): MapPin[] {
 export function weekMapPins(pins: MapPin[]): MapPin[] {
   const cities = new Set(Object.values(PLACES).map((spot) => spot.city));
   const addresses = pins.filter((pin) => !cities.has(pin.ip));
-  return pinsWithWeek(addresses, ANALYTICS_WEEK.countries);
+  const week = pinsWithWeek(addresses, ANALYTICS_WEEK.countries);
+  const seen = new Set(week.map((pin) => pin.place));
+  const extra = EXTRA_CITIES.filter((pin) => !seen.has(pin.place));
+  return [...week, ...extra].sort((a, b) => b.hits - a.hits || (a.place ?? "").localeCompare(b.place ?? ""));
 }
