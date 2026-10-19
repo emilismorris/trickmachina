@@ -2,7 +2,6 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { AdminGoogleButton } from "@/components/admin-google";
 import { TrafficMap } from "@/components/traffic-map";
-import { ANALYTICS_WEEK, deskStats, weekMapPins } from "@/data/analytics-week";
 import { isAdminEmail } from "@/lib/admin-email";
 import { getAdminDashboard, type VisitRange } from "@/lib/admin.functions";
 import { signOut } from "@/lib/auth/client";
@@ -97,13 +96,26 @@ function AdminPage() {
     );
   }
 
-  const stats = deskStats(data?.report ?? null, range);
+  const report = data?.report;
+  const stats = report ?? {
+    users: 0,
+    newUsers: 0,
+    views: 0,
+    events: 0,
+    engagement: null as string | null,
+    pages: [],
+    countries: [],
+    sources: [],
+    devices: [],
+    browsers: [],
+    languages: [],
+  };
   const pages = stats.pages.map((row) => ({ ...row, ...pageMeta(row.label) }));
   const maxPage = Math.max(1, ...pages.map((row) => row.hits));
   const countries = stats.countries;
   const maxCountry = Math.max(1, ...countries.map((row) => row.hits));
-  const sources = (stats.sources ?? []).map((row) => ({ ...row, label: sourceMedium(row.label) }));
-  const pins = weekMapPins(data?.pins ?? [], countries);
+  const sources = stats.sources.map((row) => ({ ...row, label: sourceMedium(row.label) }));
+  const pins = data?.pins ?? [];
   const rangeLabel = range === "7" ? "Last 7 days" : range === "28" ? "Last 28 days" : "All time";
 
   return (
@@ -121,7 +133,7 @@ function AdminPage() {
         <p className="admin-note">
           {rangeLabel}. {stats.users.toLocaleString("en-US")} active users, {stats.views.toLocaleString("en-US")} visits.
         </p>
-        {failed ? <p className="admin-warn">The live count didn’t load. This is the Analytics week.</p> : null}
+        {failed ? <p className="admin-warn">The count didn’t load.</p> : null}
         <div className="range" role="group" aria-label="Date range">
           {(
             [
@@ -141,9 +153,11 @@ function AdminPage() {
           <Stat label="Visits" value={stats.views} />
           <Stat label="Events" value={stats.events} />
         </section>
-        <p className="engage">
-          Average engagement time <strong>{stats.engagement ?? ANALYTICS_WEEK.engagement}</strong>
-        </p>
+        {stats.engagement ? (
+          <p className="engage">
+            Average engagement time <strong>{stats.engagement}</strong>
+          </p>
+        ) : null}
             <section className="admin-block">
               <div className="block-head">
                 <h2>Views by page title and screen class</h2>
@@ -186,14 +200,10 @@ function AdminPage() {
               </ul>
               )}
               <h2 className="map-title">Where they come from</h2>
-              <p className="admin-note map-note">
-                Country totals are the Analytics export. A dash means that city was seen, but Analytics did not include its count.
-              </p>
-              </p>
               <TrafficMap pins={pins} />
               <h3>Session source / medium</h3>
               {sources.length === 0 ? (
-                <p className="admin-note">The export had no source table. New visits record source and medium here.</p>
+                <p className="admin-note">None yet.</p>
               ) : (
                 <MetricList rows={sources} />
               )}
