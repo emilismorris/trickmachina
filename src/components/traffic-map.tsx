@@ -6,6 +6,7 @@ export type MapPin = {
   lat: number | null;
   lng: number | null;
   place: string | null;
+  counted?: boolean;
 };
 
 const W = 960;
@@ -141,27 +142,31 @@ export function TrafficMap({ pins }: { pins: MapPin[] }) {
         id: string;
         name: string;
         hits: number;
+        counted: boolean;
         points: Point[];
-        cities: Map<string, { id: string; name: string; hits: number; points: Point[] }>;
+        cities: Map<string, { id: string; name: string; hits: number; counted: boolean; points: Point[] }>;
       }
     >();
     for (const pin of pins) {
-      const hits = Number(pin.hits) || 0;
+      const counted = pin.counted !== false;
+      const hits = counted ? Number(pin.hits) || 0 : 0;
       const { city, country } = splitPlace(pin.place);
       const point = pin.lat != null && pin.lng != null ? project(pin.lat, pin.lng) : null;
       let row = countries.get(country);
       if (!row) {
-        row = { id: placeId("country", country), name: country, hits: 0, points: [], cities: new Map() };
+        row = { id: placeId("country", country), name: country, hits: 0, counted: false, points: [], cities: new Map() };
         countries.set(country, row);
       }
       row.hits += hits;
+      row.counted = row.counted || counted;
       if (point) row.points.push(point);
       let cityRow = row.cities.get(city);
       if (!cityRow) {
-        cityRow = { id: placeId("city", country, city), name: city, hits: 0, points: [] };
+        cityRow = { id: placeId("city", country, city), name: city, hits: 0, counted: false, points: [] };
         row.cities.set(city, cityRow);
       }
       cityRow.hits += hits;
+      cityRow.counted = cityRow.counted || counted;
       if (point) cityRow.points.push(point);
     }
     return [...countries.values()]
@@ -435,7 +440,7 @@ export function TrafficMap({ pins }: { pins: MapPin[] }) {
                   onClick={() => go(country.id, country.points)}
                 >
                   <span>{country.name}</span>
-                  <strong>{country.hits.toLocaleString("en-US")}</strong>
+                  <strong>{country.counted ? country.hits.toLocaleString("en-US") : "—"}</strong>
                 </button>
                 {nested.length ? (
                   <ul>
@@ -449,7 +454,7 @@ export function TrafficMap({ pins }: { pins: MapPin[] }) {
                           onClick={() => go(city.id, city.points)}
                         >
                           <span>{city.name}</span>
-                          <strong>{city.hits.toLocaleString("en-US")}</strong>
+                          <strong>{city.counted ? city.hits.toLocaleString("en-US") : "—"}</strong>
                         </button>
                       </li>
                     ))}
@@ -478,7 +483,7 @@ export function TrafficMap({ pins }: { pins: MapPin[] }) {
               >
                 <span className="pin-ip">{pin.ip}</span>
                 <span className="pin-place">{pin.place ?? (pin.lat == null ? "Location unknown" : "Unnamed")}</span>
-                <strong>{(Number(pin.hits) || 0).toLocaleString("en-US")}</strong>
+                <strong>{pin.counted === false ? "—" : (Number(pin.hits) || 0).toLocaleString("en-US")}</strong>
               </button>
             </li>
           );

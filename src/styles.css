@@ -61,7 +61,7 @@
 .stack{z-index:1;height:100dvh;position:relative}
 .floor{z-index:2;flex-direction:column;align-items:center;gap:1.1rem;width:min(100%,48rem);padding:0 .75rem;display:flex;position:absolute;top:50%;left:50%;translate:-50% -50%}
 .archive-head{flex-direction:column;align-items:center;gap:.55rem;text-align:center;display:flex}
-.archive-title{color:var(--color-fg);letter-spacing:.22em;text-transform:uppercase;text-shadow:0 1px 2px #000000e6,0 0 14px #000000b3;opacity:0;margin:0;font-size:clamp(1.05rem,2.8vw,1.85rem);font-weight:300;line-height:1}
+.archive-title{color:var(--color-fg);letter-spacing:.14em;text-transform:uppercase;text-shadow:0 1px 2px #000000e6,0 0 14px #000000b3;opacity:0;margin:0;font-size:clamp(1.15rem,3vw,2rem);font-weight:700;line-height:1}
 .archive-line{color:var(--color-fg);text-shadow:0 1px 2px #000000e6,0 0 12px #000000b3;opacity:0;max-width:26rem;margin:0;font-size:clamp(.95rem,2.4vw,1.2rem);font-weight:300;line-height:1.35}
 .deck{flex-wrap:nowrap;justify-content:center;align-items:stretch;gap:clamp(.35rem,1.4vw,.8rem);width:100%;display:flex}
 .cat{min-height:4.75rem;color:var(--color-fg);font:inherit;background:0 0;border:0;flex-direction:column;flex:1 1 0;justify-content:flex-start;align-items:center;margin:0;padding:1.35rem .2rem .85rem;text-decoration:none;display:flex}

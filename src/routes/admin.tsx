@@ -187,11 +187,8 @@ function AdminPage() {
               )}
               <h2 className="map-title">Where they come from</h2>
               <p className="admin-note map-note">
-                {countries.length.toLocaleString("en-US")} {countries.length === 1 ? "country" : "countries"} in {rangeLabel.toLowerCase()}
-                {pins.length > countries.length
-                  ? `, plus ${(pins.length - countries.length).toLocaleString("en-US")} ${pins.length - countries.length === 1 ? "address" : "addresses"} counted here`
-                  : ""}
-                . Zoom the map, or choose a place.
+                Country totals are the Analytics export. A dash means that city was seen, but Analytics did not include its count.
+              </p>
               </p>
               <TrafficMap pins={pins} />
               <h3>Session source / medium</h3>
