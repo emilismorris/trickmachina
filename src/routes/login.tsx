@@ -1,8 +1,7 @@
 import { createFileRoute, Link, Navigate, stripSearchParams } from "@tanstack/react-router";
-import { useEffect } from "react";
-import { AdminGoogleButton } from "@/components/admin-google";
+import { useEffect, useState, type FormEvent } from "react";
 import { isAdminEmail } from "@/lib/admin-email";
-import { signOut } from "@/lib/auth/client";
+import { authClient, signOut } from "@/lib/auth/client";
 import { hasGateSessionMarker } from "@/lib/auth/gate-session-marker";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
 
@@ -21,6 +20,53 @@ export const Route = createFileRoute("/login")({
   }),
   component: Login,
 });
+
+function PasswordSignIn() {
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  async function submit(event: FormEvent) {
+    event.preventDefault();
+    setBusy(true);
+    setError("");
+    const email = "emil@trickmachina.com";
+    const signed = await authClient.signIn.email({ email, password, callbackURL: "/admin" });
+    if (!signed.error) {
+      window.location.assign("/admin");
+      return;
+    }
+    const created = await authClient.signUp.email({ email, password, name: "Admin", callbackURL: "/admin" });
+    if (!created.error) {
+      window.location.assign("/admin");
+      return;
+    }
+    setBusy(false);
+    const message = created.error.message ?? "";
+    setError(/exist/i.test(message) ? "Wrong password." : message || "Sign-in didn’t finish.");
+  }
+
+  return (
+    <form onSubmit={submit}>
+      <style>{".admin-pass{width:100%;min-height:2.75rem;margin-top:1rem;color:inherit;background:transparent;border:1px solid #3a342e;font:inherit;padding:0 .8rem}"}</style>
+      <input
+        className="admin-pass"
+        type="password"
+        name="password"
+        autoComplete="current-password"
+        required
+        minLength={8}
+        value={password}
+        onChange={(event) => setPassword(event.target.value)}
+        aria-label="Password"
+      />
+      <button className="btn-google" type="submit" disabled={busy}>
+        {busy ? "Signing in…" : "Sign in"}
+      </button>
+      {error ? <p className="admin-warn">{error}</p> : null}
+    </form>
+  );
+}
 
 function Login() {
   const { refused } = Route.useSearch();
@@ -50,10 +96,10 @@ function Login() {
       <section className="admin-card">
         <p className="kicker">Admin</p>
         <h1>Sign in</h1>
-        <p className="admin-note">Sign in with the admin Google account.</p>
-        {refused ? <p className="admin-warn">That Google account isn’t the admin. It was signed out.</p> : null}
-        {user && !admin ? <p className="admin-warn">This Google account isn’t the admin. Switch accounts.</p> : null}
-        <AdminGoogleButton />
+        <p className="admin-note">Google can’t return to this domain. Choose a password. The first time creates the admin account.</p>
+        {refused ? <p className="admin-warn">That account isn’t the admin. It was signed out.</p> : null}
+        {user && !admin ? <p className="admin-warn">This account isn’t the admin. Switch accounts.</p> : null}
+        <PasswordSignIn />
       </section>
     </main>
   );
