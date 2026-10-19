@@ -34,9 +34,17 @@ function withPrefixCookie(response: Response, prefix: string): Response {
 }
 
 async function handleAuth(request: Request): Promise<Response> {
-  const prefix = previewPrefixFrom(request);
-  const response = await withPreviewAuthBase(prefix, request, (next) => auth.handler(next));
-  return prefix ? withPrefixCookie(response, prefix) : response;
+  try {
+    const prefix = previewPrefixFrom(request);
+    const response = await withPreviewAuthBase(prefix, request, (next) => auth.handler(next));
+    return prefix ? withPrefixCookie(response, prefix) : response;
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Sign-in failed";
+    return new Response(JSON.stringify({ message }), {
+      status: 500,
+      headers: { "content-type": "application/json" },
+    });
+  }
 }
 
 export const Route = createFileRoute("/api/auth/$")({
