@@ -6,20 +6,28 @@ import { auth } from "@/lib/auth/server";
 import { getSql } from "@/lib/db";
 import { previewPasswordHostName } from "@/lib/preview-password-host";
 
-function requestHost(request: Request): string {
-  const raw = request.headers.get("x-forwarded-host") || request.headers.get("host") || "";
-  return raw.split(",")[0]?.trim().replace(/:\d+$/, "").toLowerCase() ?? "";
+function hostName(value: string | null): string {
+  const raw = value?.split(",")[0]?.trim() ?? "";
+  if (!raw) return "";
+  try {
+    if (raw.includes("://")) return new URL(raw).hostname.toLowerCase();
+  } catch {
+    /* not a URL */
+  }
+  return raw.replace(/:\d+$/, "").toLowerCase();
 }
 
 /** The preview keeps its own admin password, separate from trickmachina.com. */
-function canReplaceAdminPassword(host: string): boolean {
-  return previewPasswordHostName(host);
+function canReplaceAdminPassword(request: Request): boolean {
+  return [request.headers.get("x-forwarded-host"), request.headers.get("host"), request.headers.get("origin"), request.headers.get("referer")].some(
+    (value) => previewPasswordHostName(hostName(value)),
+  );
 }
 
 async function replacePreviewPassword(request: Request): Promise<Response | null> {
   const path = new URL(request.url).pathname;
   if (request.method !== "POST" || !path.endsWith("/admin-password")) return null;
-  if (!canReplaceAdminPassword(requestHost(request))) {
+  if (!canReplaceAdminPassword(request)) {
     return Response.json({ message: "This address keeps its saved password." }, { status: 403 });
   }
   let password = "";

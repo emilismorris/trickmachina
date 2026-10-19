@@ -110,6 +110,14 @@ function createNeonSql(): Promise<Sql> {
     types.setTypeParser(OID_INTERVAL, identity);
     const pool = new Pool({ connectionString: neonConnectionString(databaseUrl as string) });
     pool.on("error", () => {});
+    const client = await pool.connect();
+    try {
+      await applyNeonMigrations(client);
+    } catch (err) {
+      console.error("[migrate]", err);
+    } finally {
+      client.release();
+    }
     return toSql(async <T>(text: string, params: unknown[]) => {
       const res = await pool.query(text, params);
       return res.rows as T[];
@@ -119,6 +127,34 @@ function createNeonSql(): Promise<Sql> {
     throw err;
   });
   return globalRef.__pgSqlPromise__;
+}
+
+/** Production skips the build migrator when DATABASE_URL is missing at build time. Apply the same files on first use. */
+async function applyNeonMigrations(client: { query: (text: string, params?: unknown[]) => Promise<{ rows: { name: string }[] }> }) {
+  const migrations = import.meta.glob("/migrations/*.sql", {
+    query: "?raw",
+    import: "default",
+    eager: true,
+  }) as Record<string, string>;
+  await client.query(
+    "create table if not exists _migrations (name text primary key, applied_at timestamptz not null default now())",
+  );
+  const applied = (await client.query("select name from _migrations")).rows.map((row) => row.name);
+  for (const { name, path } of pendingMigrations(Object.keys(migrations), applied)) {
+    try {
+      await client.query("begin");
+      await client.query(migrations[path]);
+      await client.query("insert into _migrations (name) values ($1)", [name]);
+      await client.query("commit");
+    } catch (err) {
+      try {
+        await client.query("rollback");
+      } catch {
+        /* keep the original error */
+      }
+      throw err;
+    }
+  }
 }
 
 async function createPgliteSql(): Promise<Sql> {
@@ -150,8 +186,7 @@ async function createPgliteSql(): Promise<Sql> {
   // files are tracked in _migrations. The glob does not descend, so the opt-in
   // auth schema under migrations/auth/ stays out. Runs once per module instance
   // — so an HMR reload after adding a migration file applies it live — with
-  // passes serialized on a global chain so concurrent callers never
-  // double-apply.
+  // passes serialized on a global chain so concurrent callers never double-apply.
   const migrate = async (): Promise<void> => {
     const migrations = import.meta.glob("/migrations/*.sql", {
       query: "?raw",

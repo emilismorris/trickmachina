@@ -65,7 +65,7 @@ function PasswordSignIn() {
       } else if (saved.status !== 404) {
         const body = (await saved.json().catch(() => null)) as { message?: string } | null;
         setBusy(false);
-        setError(body?.message || signed.error.message || "Sign-in didn’t finish.");
+        setError(body?.message || "Sign-in didn’t finish. Try that password again.");
         return;
       }
     }
@@ -79,7 +79,7 @@ function PasswordSignIn() {
     const message = created.error.message ?? "";
     setError(
       /exist/i.test(message)
-        ? "Wrong password for this address. The preview and trickmachina.com keep separate passwords."
+        ? "That password doesn’t match this address yet. Type it once more."
         : message || signed.error.message || "Sign-in didn’t finish.",
     );
   }

@@ -96,6 +96,15 @@ export async function bumpHit(key: HitKey) {
     on conflict (ip) do update set hits = traffic_pin.hits + 1, updated_at = now()`;
 }
 
+async function optional<T>(query: Promise<T>, fallback: T): Promise<T> {
+  try {
+    return await query;
+  } catch (err) {
+    console.error("[desk]", err);
+    return fallback;
+  }
+}
+
 export async function loadAdminDashboard(userId: string, range: VisitRange) {
   const sql = await getSql();
   const users = await sql<{ email: string }>`select email from "user" where id = ${userId}`;
@@ -103,10 +112,11 @@ export async function loadAdminDashboard(userId: string, range: VisitRange) {
   if (!isAdminEmail(email)) {
     throw new Error("Forbidden");
   }
-  const traffic = await sql<{ key: string; hits: number }>`select key, hits from page_stat order by key`;
-  const pins = await sql<TrafficPin>`
-    select ip, hits, lat, lng, place from traffic_pin order by hits desc, updated_at desc limit 400
-  `;
+  const traffic = await optional(sql<{ key: string; hits: number }>`select key, hits from page_stat order by key`, []);
+  const pins = await optional(
+    sql<TrafficPin>`select ip, hits, lat, lng, place from traffic_pin order by hits desc, updated_at desc limit 400`,
+    [],
+  );
   const days = range === "all" ? null : Number(range);
   const since = days === null ? null : days - 1;
   const rows = async (kind: string) =>
@@ -120,15 +130,16 @@ export async function loadAdminDashboard(userId: string, range: VisitRange) {
     `;
   const [usersRow, newRow, sessionsRow, viewsRow, eventsRow, importedRow, pages, sources, countries, devices, browsers, languages] =
     await Promise.all([
-      sql<{ n: number }>`select count(distinct visitor)::int as n from analytics_visitor where (${since}::int is null or day >= current_date - ${since}::int)`,
-      sql<{ n: number }>`select count(*)::int as n from analytics_user where (${since}::int is null or first_day >= current_date - ${since}::int)`,
-      sql<{ n: number }>`select count(distinct session)::int as n from analytics_session where (${since}::int is null or day >= current_date - ${since}::int)`,
-      sql<{ n: number }>`select coalesce(sum(hits), 0)::int as n from analytics_stat where kind = 'path' and (${since}::int is null or day >= current_date - ${since}::int)`,
-      sql<{ n: number }>`select coalesce(sum(hits), 0)::int as n from analytics_stat where kind = 'event' and label = 'all' and (${since}::int is null or day >= current_date - ${since}::int)`,
-      sql<{ n: number }>`select count(*)::int as n from analytics_user where visitor like 'ga:%' and (${since}::int is null or first_day >= current_date - ${since}::int)`,
-      rows("path"),
-      rows("source"),
-      sql<MetricRow>`
+      optional(sql<{ n: number }>`select count(distinct visitor)::int as n from analytics_visitor where (${since}::int is null or day >= current_date - ${since}::int)`, []),
+      optional(sql<{ n: number }>`select count(*)::int as n from analytics_user where (${since}::int is null or first_day >= current_date - ${since}::int)`, []),
+      optional(sql<{ n: number }>`select count(distinct session)::int as n from analytics_session where (${since}::int is null or day >= current_date - ${since}::int)`, []),
+      optional(sql<{ n: number }>`select coalesce(sum(hits), 0)::int as n from analytics_stat where kind = 'path' and (${since}::int is null or day >= current_date - ${since}::int)`, []),
+      optional(sql<{ n: number }>`select coalesce(sum(hits), 0)::int as n from analytics_stat where kind = 'event' and label = 'all' and (${since}::int is null or day >= current_date - ${since}::int)`, []),
+      optional(sql<{ n: number }>`select count(*)::int as n from analytics_user where visitor like 'ga:%' and (${since}::int is null or first_day >= current_date - ${since}::int)`, []),
+      optional(rows("path"), []),
+      optional(rows("source"), []),
+      optional(
+        sql<MetricRow>`
         select country as label, count(*)::int as hits
         from analytics_user
         where country is not null and (${since}::int is null or first_day >= current_date - ${since}::int)
@@ -136,9 +147,11 @@ export async function loadAdminDashboard(userId: string, range: VisitRange) {
         order by hits desc, country
         limit 40
       `,
-      rows("device"),
-      rows("browser"),
-      rows("language"),
+        [],
+      ),
+      optional(rows("device"), []),
+      optional(rows("browser"), []),
+      optional(rows("language"), []),
     ]);
   const report: VisitReport = {
     users: usersRow[0]?.n ?? 0,

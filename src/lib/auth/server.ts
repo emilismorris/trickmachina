@@ -102,6 +102,8 @@ const allowedHosts: string[] = [
   "*.grok.com",
   "trickmachina.com",
   "www.trickmachina.com",
+  "alphatrickmachina.grok.me",
+  "*.grok.me",
   "localhost",
   "127.0.0.1",
   "[::1]",
