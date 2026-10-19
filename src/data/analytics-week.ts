@@ -66,45 +66,83 @@ function floorRows(live: Metric[], floor: Metric[]) {
     .sort((a, b) => b.hits - a.hits || a.label.localeCompare(b.label));
 }
 
-export function floorWeek(
-  live: {
-    users: number;
-    newUsers: number;
-    views: number;
-    events: number;
-    engagement: string | null;
-    pages: Metric[];
-    countries: Metric[];
-    sources: Metric[];
-    devices: Metric[];
-    browsers: Metric[];
-    languages: Metric[];
-  } | null,
-) {
-  const week = ANALYTICS_WEEK;
+function rangeIncludesSnapshot(range: "7" | "28" | "all") {
+  if (range === "all") return true;
+  const start = new Date();
+  start.setHours(0, 0, 0, 0);
+  start.setDate(start.getDate() - (Number(range) - 1));
+  return start.getTime() <= new Date(2026, 9, 19).getTime();
+}
+
+function sumRows(base: Metric[], extra: Metric[]) {
+  const map = new Map<string, number>();
+  for (const row of base) map.set(row.label, (map.get(row.label) ?? 0) + row.hits);
+  for (const row of extra) map.set(row.label, (map.get(row.label) ?? 0) + row.hits);
+  return [...map.entries()]
+    .map(([label, hits]) => ({ label, hits }))
+    .sort((a, b) => b.hits - a.hits || a.label.localeCompare(b.label));
+}
+
+type LiveReport = {
+  users: number;
+  newUsers: number;
+  views: number;
+  events: number;
+  engagement: string | null;
+  importedUsers?: number;
+  pages: Metric[];
+  countries: Metric[];
+  sources: Metric[];
+  devices: Metric[];
+  browsers: Metric[];
+  languages: Metric[];
+};
+
+/** Live counts for the selected range. The Analytics week is the floor, not a second copy. */
+export function deskStats(live: LiveReport | null, range: "7" | "28" | "all") {
+  const week = rangeIncludesSnapshot(range) ? ANALYTICS_WEEK : null;
+  const blank = {
+    users: 0,
+    newUsers: 0,
+    views: 0,
+    events: 0,
+    engagement: null as string | null,
+    pages: [] as Metric[],
+    countries: [] as Metric[],
+    sources: [] as Metric[],
+    devices: [] as Metric[],
+    browsers: [] as Metric[],
+    languages: [] as Metric[],
+  };
   if (!live) {
+    if (!week) return blank;
+    return { ...blank, ...week, engagement: week.engagement };
+  }
+  if (!week) return { ...blank, ...live, engagement: live.engagement };
+  const seeded = (live.importedUsers ?? 0) >= week.users;
+  if (seeded) {
     return {
-      users: week.users,
-      newUsers: week.newUsers,
-      views: week.views,
-      events: week.events,
-      engagement: week.engagement as string | null,
-      pages: week.pages,
-      countries: week.countries,
-      sources: [] as Metric[],
-      devices: [] as Metric[],
-      browsers: [] as Metric[],
-      languages: [] as Metric[],
+      users: Math.max(live.users, week.users),
+      newUsers: Math.max(live.newUsers, week.newUsers),
+      views: Math.max(live.views, week.views),
+      events: Math.max(live.events, week.events),
+      engagement: live.engagement ?? week.engagement,
+      pages: floorRows(live.pages, week.pages),
+      countries: floorRows(live.countries, week.countries),
+      sources: live.sources,
+      devices: live.devices,
+      browsers: live.browsers,
+      languages: live.languages,
     };
   }
   return {
-    users: Math.max(live.users, week.users),
-    newUsers: Math.max(live.newUsers, week.newUsers),
-    views: Math.max(live.views, week.views),
-    events: Math.max(live.events, week.events),
+    users: week.users + live.users,
+    newUsers: week.newUsers + live.newUsers,
+    views: week.views + live.views,
+    events: week.events + live.events,
     engagement: live.engagement ?? week.engagement,
-    pages: floorRows(live.pages, week.pages),
-    countries: floorRows(live.countries, week.countries),
+    pages: sumRows(week.pages, live.pages),
+    countries: sumRows(week.countries, live.countries),
     sources: live.sources,
     devices: live.devices,
     browsers: live.browsers,
@@ -124,10 +162,10 @@ export function pinsWithWeek(pins: MapPin[], countries: Metric[]): MapPin[] {
   return [...pins, ...extra].sort((a, b) => b.hits - a.hits || (a.place ?? "").localeCompare(b.place ?? ""));
 }
 
-export function weekMapPins(pins: MapPin[]): MapPin[] {
+export function weekMapPins(pins: MapPin[], countries: Metric[] = ANALYTICS_WEEK.countries): MapPin[] {
   const cities = new Set(Object.values(PLACES).map((spot) => spot.city));
   const addresses = pins.filter((pin) => !cities.has(pin.ip));
-  const week = pinsWithWeek(addresses, ANALYTICS_WEEK.countries);
+  const week = pinsWithWeek(addresses, countries);
   const seen = new Set(week.map((pin) => pin.place));
   const extra = EXTRA_CITIES.filter((pin) => !seen.has(pin.place));
   return [...week, ...extra].sort((a, b) => b.hits - a.hits || (a.place ?? "").localeCompare(b.place ?? ""));

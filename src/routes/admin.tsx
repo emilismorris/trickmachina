@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { AdminGoogleButton } from "@/components/admin-google";
 import { TrafficMap } from "@/components/traffic-map";
-import { ANALYTICS_WEEK, weekMapPins } from "@/data/analytics-week";
+import { ANALYTICS_WEEK, deskStats, weekMapPins } from "@/data/analytics-week";
 import { isAdminEmail } from "@/lib/admin-email";
 import { getAdminDashboard, type VisitRange } from "@/lib/admin.functions";
 import { signOut } from "@/lib/auth/client";
@@ -97,12 +97,14 @@ function AdminPage() {
     );
   }
 
-  const pages = ANALYTICS_WEEK.pages.map((row) => ({ ...row, ...pageMeta(row.label) }));
+  const stats = deskStats(data?.report ?? null, range);
+  const pages = stats.pages.map((row) => ({ ...row, ...pageMeta(row.label) }));
   const maxPage = Math.max(1, ...pages.map((row) => row.hits));
-  const countries = ANALYTICS_WEEK.countries;
+  const countries = stats.countries;
   const maxCountry = Math.max(1, ...countries.map((row) => row.hits));
-  const sources = (data?.report.sources ?? []).map((row) => ({ ...row, label: sourceMedium(row.label) }));
-  const pins = weekMapPins(data?.pins ?? []);
+  const sources = (stats.sources ?? []).map((row) => ({ ...row, label: sourceMedium(row.label) }));
+  const pins = weekMapPins(data?.pins ?? [], countries);
+  const rangeLabel = range === "7" ? "Last 7 days" : range === "28" ? "Last 28 days" : "All time";
 
   return (
     <main className="admin">
@@ -116,7 +118,9 @@ function AdminPage() {
       <div className="admin-wrap">
         <p className="kicker">{data?.email ?? user.primaryEmail}</p>
         <h1>Desk</h1>
-        <p className="admin-note">Analytics week, 13–19 Oct 2026. 48 active users, 325 visits.</p>
+        <p className="admin-note">
+          {rangeLabel}. {stats.users.toLocaleString("en-US")} active users, {stats.views.toLocaleString("en-US")} visits.
+        </p>
         {failed ? <p className="admin-warn">The live count didn’t load. This is the Analytics week.</p> : null}
         <div className="range" role="group" aria-label="Date range">
           {(
@@ -132,18 +136,18 @@ function AdminPage() {
           ))}
         </div>
         <section className="stat-grid" aria-label="Analytics">
-          <Stat label="Active users" value={ANALYTICS_WEEK.users} />
-          <Stat label="New users" value={ANALYTICS_WEEK.newUsers} />
-          <Stat label="Visits" value={ANALYTICS_WEEK.views} />
-          <Stat label="Events" value={ANALYTICS_WEEK.events} />
+          <Stat label="Active users" value={stats.users} />
+          <Stat label="New users" value={stats.newUsers} />
+          <Stat label="Visits" value={stats.views} />
+          <Stat label="Events" value={stats.events} />
         </section>
         <p className="engage">
-          Average engagement time <strong>{ANALYTICS_WEEK.engagement}</strong>
+          Average engagement time <strong>{stats.engagement ?? ANALYTICS_WEEK.engagement}</strong>
         </p>
             <section className="admin-block">
               <div className="block-head">
                 <h2>Views by page title and screen class</h2>
-                <strong>{ANALYTICS_WEEK.views.toLocaleString("en-US")}</strong>
+                <strong>{stats.views.toLocaleString("en-US")}</strong>
               </div>
               {pages.length === 0 ? (
                 <p className="admin-note">None yet.</p>
@@ -167,7 +171,7 @@ function AdminPage() {
               ) : (
               <ul className="hit-list country-list">
                 {countries.map((row) => {
-                  const share = ANALYTICS_WEEK.users > 0 ? (row.hits / ANALYTICS_WEEK.users) * 100 : 0;
+                  const share = stats.users > 0 ? (row.hits / stats.users) * 100 : 0;
                   return (
                     <li key={row.label}>
                       <span>{row.label}</span>
@@ -183,7 +187,7 @@ function AdminPage() {
               )}
               <h2 className="map-title">Where they come from</h2>
               <p className="admin-note map-note">
-                {countries.length.toLocaleString("en-US")} {countries.length === 1 ? "country" : "countries"} from this Analytics week
+                {countries.length.toLocaleString("en-US")} {countries.length === 1 ? "country" : "countries"} in {rangeLabel.toLowerCase()}
                 {pins.length > countries.length
                   ? `, plus ${(pins.length - countries.length).toLocaleString("en-US")} ${pins.length - countries.length === 1 ? "address" : "addresses"} counted here`
                   : ""}

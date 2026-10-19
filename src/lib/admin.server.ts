@@ -29,11 +29,41 @@ export type TrafficPin = {
 
 export type MetricRow = { label: string; hits: number };
 
+const COUNTRY_PIN: Record<string, { city: string; lat: number; lng: number }> = {
+  Estonia: { city: "Tallinn", lat: 59.437, lng: 24.7536 },
+  "United States": { city: "Washington", lat: 38.9072, lng: -77.0369 },
+  Germany: { city: "Berlin", lat: 52.52, lng: 13.405 },
+  Latvia: { city: "Riga", lat: 56.9496, lng: 24.1052 },
+  Netherlands: { city: "Amsterdam", lat: 52.3676, lng: 4.9041 },
+  Poland: { city: "Warsaw", lat: 52.2297, lng: 21.0122 },
+  Italy: { city: "Rome", lat: 41.9028, lng: 12.4964 },
+  Finland: { city: "Helsinki", lat: 60.1699, lng: 24.9384 },
+};
+
+function withCountryPins(pins: TrafficPin[], countries: MetricRow[]): TrafficPin[] {
+  const extra = countries.flatMap((country) => {
+    const spot = COUNTRY_PIN[country.label];
+    if (!spot || country.hits < 1) return [];
+    const pin: TrafficPin = {
+      ip: spot.city,
+      hits: country.hits,
+      lat: spot.lat,
+      lng: spot.lng,
+      place: `${spot.city}, ${country.label}`,
+    };
+    return [pin];
+  });
+  return [...pins, ...extra].sort((a, b) => b.hits - a.hits || (a.place ?? "").localeCompare(b.place ?? ""));
+}
+
 export type VisitReport = {
   users: number;
   newUsers: number;
   sessions: number;
   views: number;
+  events: number;
+  engagement: string | null;
+  importedUsers: number;
   pages: MetricRow[];
   sources: MetricRow[];
   countries: MetricRow[];
@@ -61,21 +91,24 @@ export async function bumpVisit(visit: VisitBeacon) {
   await addStat("device", visit.device);
   await addStat("browser", visit.browser);
   await addStat("language", visit.language);
+  await addStat("event", "all");
   await sql`insert into analytics_visitor (day, visitor) values (current_date, ${visitor}) on conflict do nothing`;
   await sql`insert into analytics_user (visitor, first_day) values (${visitor}, current_date) on conflict do nothing`;
   await sql`insert into analytics_session (day, session) values (current_date, ${session}) on conflict do nothing`;
 
   const ip = clientIp();
-  if (!ip) return;
-  const geo = await locateIp(ip);
-  const country = geo?.place?.split(", ").at(-1);
-  if (country) await addStat("country", country.slice(0, 80));
+  const geo = ip ? await locateIp(ip) : null;
+  const country = geo?.place?.split(", ").at(-1)?.slice(0, 80);
+  if (country) {
+    await sql`update analytics_user set country = ${country} where visitor = ${visitor} and country is null`;
+  }
 }
 
 export async function bumpHit(key: HitKey) {
   const sql = await getSql();
   await sql`insert into page_stat (key, hits) values (${key}, 1)
     on conflict (key) do update set hits = page_stat.hits + 1, updated_at = now()`;
+  if (key === "play" || key === "search") await addStat("event", "all");
 
   const ip = clientIp();
   if (!ip) return;
@@ -112,23 +145,36 @@ export async function loadAdminDashboard(userId: string, range: VisitRange) {
       order by hits desc, label
       limit 40
     `;
-  const [usersRow, newRow, sessionsRow, viewsRow, pages, sources, countries, devices, browsers, languages] = await Promise.all([
-    sql<{ n: number }>`select count(distinct visitor)::int as n from analytics_visitor where (${since}::int is null or day >= current_date - ${since}::int)`,
-    sql<{ n: number }>`select count(*)::int as n from analytics_user where (${since}::int is null or first_day >= current_date - ${since}::int)`,
-    sql<{ n: number }>`select count(distinct session)::int as n from analytics_session where (${since}::int is null or day >= current_date - ${since}::int)`,
-    sql<{ n: number }>`select coalesce(sum(hits), 0)::int as n from analytics_stat where kind = 'path' and (${since}::int is null or day >= current_date - ${since}::int)`,
-    rows("path"),
-    rows("source"),
-    rows("country"),
-    rows("device"),
-    rows("browser"),
-    rows("language"),
-  ]);
+  const [usersRow, newRow, sessionsRow, viewsRow, eventsRow, importedRow, pages, sources, countries, devices, browsers, languages] =
+    await Promise.all([
+      sql<{ n: number }>`select count(distinct visitor)::int as n from analytics_visitor where (${since}::int is null or day >= current_date - ${since}::int)`,
+      sql<{ n: number }>`select count(*)::int as n from analytics_user where (${since}::int is null or first_day >= current_date - ${since}::int)`,
+      sql<{ n: number }>`select count(distinct session)::int as n from analytics_session where (${since}::int is null or day >= current_date - ${since}::int)`,
+      sql<{ n: number }>`select coalesce(sum(hits), 0)::int as n from analytics_stat where kind = 'path' and (${since}::int is null or day >= current_date - ${since}::int)`,
+      sql<{ n: number }>`select coalesce(sum(hits), 0)::int as n from analytics_stat where kind = 'event' and label = 'all' and (${since}::int is null or day >= current_date - ${since}::int)`,
+      sql<{ n: number }>`select count(*)::int as n from analytics_user where visitor like 'ga:%' and (${since}::int is null or first_day >= current_date - ${since}::int)`,
+      rows("path"),
+      rows("source"),
+      sql<MetricRow>`
+        select country as label, count(*)::int as hits
+        from analytics_user
+        where country is not null and (${since}::int is null or first_day >= current_date - ${since}::int)
+        group by country
+        order by hits desc, country
+        limit 40
+      `,
+      rows("device"),
+      rows("browser"),
+      rows("language"),
+    ]);
   const report: VisitReport = {
     users: usersRow[0]?.n ?? 0,
     newUsers: newRow[0]?.n ?? 0,
     sessions: sessionsRow[0]?.n ?? 0,
     views: viewsRow[0]?.n ?? 0,
+    events: eventsRow[0]?.n ?? 0,
+    engagement: (importedRow[0]?.n ?? 0) > 0 ? "2m 41s" : null,
+    importedUsers: importedRow[0]?.n ?? 0,
     pages,
     sources,
     countries,
@@ -139,7 +185,7 @@ export async function loadAdminDashboard(userId: string, range: VisitRange) {
   return {
     email,
     traffic,
-    pins,
+    pins: withCountryPins(pins, countries),
     archive: archiveStats,
     range,
     report,
