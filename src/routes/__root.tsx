@@ -3,6 +3,7 @@ import { createRootRoute, HeadContent, Link, Outlet, Scripts, useRouterState } f
 import { AuthProvider } from "@/lib/auth/provider";
 import { PreviewHostBridge } from "@/components/preview-host-bridge";
 import { GA_ID, trackPage } from "@/lib/ga";
+import { collectVisit } from "@/lib/visit";
 import appCss from "../styles.css?url";
 
 export const Route = createRootRoute({
@@ -59,6 +60,7 @@ function Analytics() {
   const href = useRouterState({ select: (state) => state.location.href });
   const first = useRef(true);
   useEffect(() => {
+    collectVisit(href);
     if (first.current) {
       first.current = false;
       return;

@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { AdminGoogleButton } from "@/components/admin-google";
 import { TrafficMap } from "@/components/traffic-map";
 import { isAdminEmail } from "@/lib/admin-email";
-import { getAdminDashboard } from "@/lib/admin.functions";
+import { getAdminDashboard, type VisitRange } from "@/lib/admin.functions";
 import { signOut } from "@/lib/auth/client";
 import { hasGateSessionMarker } from "@/lib/auth/gate-session-marker";
 import { RedirectToSignIn, UserButton } from "@/lib/auth/gates";
@@ -22,6 +22,19 @@ export const Route = createFileRoute("/admin")({
   component: AdminPage,
 });
 
+const SCREEN_CLASS: Record<string, string> = {
+  "/": "Landing",
+  "/skate": "Skate",
+  "/bmx": "BMX",
+  "/blades": "Blades",
+  "/scoot": "Scoot",
+  "/cookies": "Cookies",
+};
+
+function screenClass(path: string) {
+  return SCREEN_CLASS[path] ?? "Page";
+}
+
 const HIT_LABELS: Record<(typeof HIT_KEYS)[number], string> = {
   landing: "Landing",
   skate: "Skate opens",
@@ -37,6 +50,7 @@ function AdminPage() {
   const admin = Boolean(user && isAdminEmail(user.primaryEmail));
   const [data, setData] = useState<Dashboard | null>(null);
   const [failed, setFailed] = useState(false);
+  const [range, setRange] = useState<VisitRange>("28");
 
   useEffect(() => {
     if (isPending || !user || admin) return;
@@ -47,7 +61,8 @@ function AdminPage() {
   useEffect(() => {
     if (!admin || !user) return;
     let cancel = false;
-    getAdminDashboard()
+    setFailed(false);
+    getAdminDashboard({ data: range })
       .then((next) => {
         if (!cancel) setData(next);
       })
@@ -57,7 +72,7 @@ function AdminPage() {
     return () => {
       cancel = true;
     };
-  }, [admin, user?.id]);
+  }, [admin, range, user?.id]);
 
   if (isPending) {
     return (
@@ -84,7 +99,11 @@ function AdminPage() {
   }
 
   const hits = new Map((data?.traffic ?? []).map((row) => [row.key, row.hits]));
-  const visits = HIT_KEYS.reduce((sum, key) => sum + (key === "play" || key === "search" ? 0 : (hits.get(key) ?? 0)), 0);
+  const visits =
+    HIT_KEYS.reduce((sum, key) => sum + (key === "play" || key === "search" ? 0 : (hits.get(key) ?? 0)), 0) +
+    (data?.report.views ?? 0);
+  const pages = data?.report.pages ?? [];
+  const maxPage = Math.max(1, ...pages.map((row) => row.hits));
   const maxHit = Math.max(1, ...HIT_KEYS.map((key) => hits.get(key) ?? 0));
 
   return (
@@ -116,6 +135,41 @@ function AdminPage() {
                 {data.pins.length.toLocaleString("en-US")} {data.pins.length === 1 ? "address" : "addresses"}. Zoom the map, or choose a place.
               </p>
               <TrafficMap pins={data.pins} />
+            </section>
+            <section className="admin-block">
+              <h2>Audience</h2>
+              <p className="admin-note">Counted on this site, the same reports as Analytics. Older Google numbers are not included.</p>
+              <div className="range" role="group" aria-label="Date range">
+                {(
+                  [
+                    ["7", "7 days"],
+                    ["28", "28 days"],
+                    ["all", "All time"],
+                  ] as const
+                ).map(([value, label]) => (
+                  <button key={value} type="button" className={range === value ? "is-on" : ""} onClick={() => setRange(value)}>
+                    {label}
+                  </button>
+                ))}
+              </div>
+              <section className="stat-grid" aria-label="Audience totals">
+                <Stat label="Users" value={data.report.users} />
+                <Stat label="New users" value={data.report.newUsers} />
+                <Stat label="Sessions" value={data.report.sessions} />
+                <Stat label="Views" value={data.report.views} />
+              </section>
+              <h3>Page path and screen class</h3>
+              <MetricList rows={pages} max={maxPage} screen />
+              <h3>Session source</h3>
+              <MetricList rows={data.report.sources} />
+              <h3>Country</h3>
+              <MetricList rows={data.report.countries} />
+              <h3>Device</h3>
+              <MetricList rows={data.report.devices} />
+              <h3>Browser</h3>
+              <MetricList rows={data.report.browsers} />
+              <h3>Language</h3>
+              <MetricList rows={data.report.languages} />
             </section>
             <section className="admin-block">
               <h2>Traffic</h2>
@@ -173,6 +227,25 @@ function AdminPage() {
         ) : null}
       </div>
     </main>
+  );
+}
+
+function MetricList({ rows, max, screen = false }: { rows: { label: string; hits: number }[]; max?: number; screen?: boolean }) {
+  const top = Math.max(1, max ?? Math.max(1, ...rows.map((row) => row.hits)));
+  if (rows.length === 0) return <p className="admin-note">None yet.</p>;
+  return (
+    <ul className={screen ? "hit-list path-list" : "hit-list"}>
+      {rows.map((row) => (
+        <li key={row.label}>
+          <span>{row.label}</span>
+          {screen ? <span className="screen-class">{screenClass(row.label)}</span> : null}
+          <span className="hit-track" aria-hidden="true">
+            <span style={{ width: `${(row.hits / top) * 100}%` }} />
+          </span>
+          <strong>{row.hits.toLocaleString("en-US")}</strong>
+        </li>
+      ))}
+    </ul>
   );
 }
 

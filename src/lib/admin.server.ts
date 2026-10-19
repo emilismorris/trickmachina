@@ -3,6 +3,19 @@ import { isAdminEmail } from "@/lib/admin-email";
 import { getSql } from "@/lib/db";
 import { clientIp, locateIp } from "@/lib/geo.server";
 import type { HitKey } from "@/lib/hits";
+import { createHash } from "node:crypto";
+
+type VisitBeacon = {
+  path: string;
+  source: string;
+  device: "mobile" | "desktop" | "tablet";
+  browser: string;
+  language: string;
+  visitor: string;
+  session: string;
+};
+
+type VisitRange = "7" | "28" | "all";
 
 export type ArchiveStats = typeof archiveStats;
 
@@ -13,6 +26,51 @@ export type TrafficPin = {
   lng: number | null;
   place: string | null;
 };
+
+export type MetricRow = { label: string; hits: number };
+
+export type VisitReport = {
+  users: number;
+  newUsers: number;
+  sessions: number;
+  views: number;
+  pages: MetricRow[];
+  sources: MetricRow[];
+  countries: MetricRow[];
+  devices: MetricRow[];
+  browsers: MetricRow[];
+  languages: MetricRow[];
+};
+
+function digest(value: string) {
+  return createHash("sha256").update(value).digest("hex").slice(0, 32);
+}
+
+async function addStat(kind: string, label: string) {
+  const sql = await getSql();
+  await sql`insert into analytics_stat (day, kind, label, hits) values (current_date, ${kind}, ${label}, 1)
+    on conflict (day, kind, label) do update set hits = analytics_stat.hits + 1`;
+}
+
+export async function bumpVisit(visit: VisitBeacon) {
+  const sql = await getSql();
+  const visitor = digest(visit.visitor);
+  const session = digest(visit.session);
+  await addStat("path", visit.path);
+  await addStat("source", visit.source.slice(0, 120));
+  await addStat("device", visit.device);
+  await addStat("browser", visit.browser);
+  await addStat("language", visit.language);
+  await sql`insert into analytics_visitor (day, visitor) values (current_date, ${visitor}) on conflict do nothing`;
+  await sql`insert into analytics_user (visitor, first_day) values (${visitor}, current_date) on conflict do nothing`;
+  await sql`insert into analytics_session (day, session) values (current_date, ${session}) on conflict do nothing`;
+
+  const ip = clientIp();
+  if (!ip) return;
+  const geo = await locateIp(ip);
+  const country = geo?.place?.split(", ").at(-1);
+  if (country) await addStat("country", country.slice(0, 80));
+}
 
 export async function bumpHit(key: HitKey) {
   const sql = await getSql();
@@ -32,7 +90,7 @@ export async function bumpHit(key: HitKey) {
     on conflict (ip) do update set hits = traffic_pin.hits + 1, updated_at = now()`;
 }
 
-export async function loadAdminDashboard(userId: string) {
+export async function loadAdminDashboard(userId: string, range: VisitRange) {
   const sql = await getSql();
   const users = await sql<{ email: string }>`select email from "user" where id = ${userId}`;
   const email = users[0]?.email ?? "";
@@ -43,10 +101,47 @@ export async function loadAdminDashboard(userId: string) {
   const pins = await sql<TrafficPin>`
     select ip, hits, lat, lng, place from traffic_pin order by hits desc, updated_at desc limit 400
   `;
+  const days = range === "all" ? null : Number(range);
+  const since = days === null ? null : days - 1;
+  const rows = async (kind: string) =>
+    sql<MetricRow>`
+      select label, sum(hits)::int as hits
+      from analytics_stat
+      where kind = ${kind} and (${since}::int is null or day >= current_date - ${since}::int)
+      group by label
+      order by hits desc, label
+      limit 40
+    `;
+  const [usersRow, newRow, sessionsRow, viewsRow, pages, sources, countries, devices, browsers, languages] = await Promise.all([
+    sql<{ n: number }>`select count(distinct visitor)::int as n from analytics_visitor where (${since}::int is null or day >= current_date - ${since}::int)`,
+    sql<{ n: number }>`select count(*)::int as n from analytics_user where (${since}::int is null or first_day >= current_date - ${since}::int)`,
+    sql<{ n: number }>`select count(distinct session)::int as n from analytics_session where (${since}::int is null or day >= current_date - ${since}::int)`,
+    sql<{ n: number }>`select coalesce(sum(hits), 0)::int as n from analytics_stat where kind = 'path' and (${since}::int is null or day >= current_date - ${since}::int)`,
+    rows("path"),
+    rows("source"),
+    rows("country"),
+    rows("device"),
+    rows("browser"),
+    rows("language"),
+  ]);
+  const report: VisitReport = {
+    users: usersRow[0]?.n ?? 0,
+    newUsers: newRow[0]?.n ?? 0,
+    sessions: sessionsRow[0]?.n ?? 0,
+    views: viewsRow[0]?.n ?? 0,
+    pages,
+    sources,
+    countries,
+    devices,
+    browsers,
+    languages,
+  };
   return {
     email,
     traffic,
     pins,
     archive: archiveStats,
+    range,
+    report,
   };
 }
