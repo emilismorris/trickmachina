@@ -96,6 +96,7 @@ to{opacity:1;translate:0}
 .cookies{background:#000;color:#fff;min-height:100dvh;padding:2rem 1.1rem 4rem}
 .cookies h1{letter-spacing:.14em;text-transform:uppercase;font-size:1.35rem;font-weight:300}
 .cookies>p a{color:#fff}
+.cookies-clear{min-height:2.4rem;color:#000;font:inherit;background:#fff;border:0;padding:0 .8rem}
 .contact-form{flex-direction:column;gap:.75rem;max-width:28rem;margin-top:1.2rem;display:flex}
 .contact-form label{flex-direction:column;gap:.3rem;font-size:.85rem;display:flex}
 .contact-form input,.contact-form textarea{color:#fff;font:inherit;background:#000;border:1px solid #fff;padding:.6rem .7rem}
