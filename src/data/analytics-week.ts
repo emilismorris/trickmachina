@@ -1,8 +1,8 @@
 export type Metric = { label: string; hits: number };
 
 export const ANALYTICS_WEEK = {
-  users: 51,
-  newUsers: 51,
+  users: 48,
+  newUsers: 48,
   views: 325,
   events: 1002,
   engagement: "2m 41s",
@@ -18,7 +18,6 @@ export const ANALYTICS_WEEK = {
     { label: "Estonia", hits: 22 },
     { label: "United States", hits: 14 },
     { label: "Germany", hits: 3 },
-    { label: "Lithuania", hits: 3 },
     { label: "Latvia", hits: 3 },
     { label: "Netherlands", hits: 2 },
     { label: "Poland", hits: 2 },
@@ -40,11 +39,11 @@ const PLACES: Record<string, { city: string; lat: number; lng: number }> = {
 
 /** Cities from the Analytics realtime view that are not the country stand-in. */
 const EXTRA_CITIES: MapPin[] = [
-  { ip: "San Jose", hits: 4, lat: 37.3382, lng: -121.8863, place: "San Jose, United States" },
+  { ip: "San Jose", hits: 21, lat: 37.3382, lng: -121.8863, place: "San Jose, United States" },
   { ip: "Ashburn", hits: 1, lat: 39.0438, lng: -77.4874, place: "Ashburn, United States" },
   { ip: "Seattle", hits: 1, lat: 47.6062, lng: -122.3321, place: "Seattle, United States" },
   { ip: "Boardman", hits: 1, lat: 45.8399, lng: -119.7006, place: "Boardman, United States" },
-  { ip: "Vilnius", hits: 3, lat: 54.6872, lng: 25.2797, place: "Vilnius, Lithuania" },
+  { ip: "Vilnius", hits: 31, lat: 54.6872, lng: 25.2797, place: "Vilnius, Lithuania" },
   { ip: "Stockholm", hits: 1, lat: 59.3293, lng: 18.0686, place: "Stockholm, Sweden" },
   { ip: "Frankfurt", hits: 1, lat: 50.1109, lng: 8.6821, place: "Frankfurt, Germany" },
   { ip: "Frankfurt am Main", hits: 1, lat: 50.1155, lng: 8.6842, place: "Frankfurt am Main, Germany" },
@@ -170,7 +169,9 @@ export function weekMapPins(pins: MapPin[], countries: Metric[] = ANALYTICS_WEEK
   const seen = new Set(week.map((pin) => pin.place));
   const extra = EXTRA_CITIES.filter((pin) => !seen.has(pin.place));
   const taken = new Map<string, number>();
+  const visitCities = new Set(["San Jose", "Vilnius"]);
   for (const pin of extra) {
+    if (visitCities.has(pin.ip)) continue;
     const country = pin.place?.split(", ").at(-1) ?? "";
     taken.set(country, (taken.get(country) ?? 0) + pin.hits);
   }
