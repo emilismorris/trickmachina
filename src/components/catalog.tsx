@@ -541,6 +541,12 @@ export function CatalogScreen({ catalog, onNeedMore }: { catalog: Catalog; onNee
               {item.label}
             </button>
           ))}
+          <Link to="/about" className="nav-link" onClick={() => setMenu(false)}>
+            About
+          </Link>
+          <Link to="/cookies" className="nav-link" onClick={() => setMenu(false)}>
+            Cookies
+          </Link>
         </nav>
         <div className={searching ? "nav-tools is-search" : "nav-tools"}>
           {searching ? (

@@ -95,10 +95,6 @@ function Home() {
           </section>
         </div>
       </div>
-      <p className="legal">
-        <Link to="/about">About</Link>
-        <Link to="/cookies">Cookies</Link>
-      </p>
       <p className="sr-only" aria-live="polite">
         {active ? active.gear : ""}
       </p>

@@ -91,8 +91,6 @@ to{opacity:1;filter:blur();translate:0}
 .cat:hover .label,.cat:focus-visible .label,.cat:hover .soon,.cat:focus-visible .soon,.cat[aria-pressed=true] .label,.cat[aria-pressed=true] .soon{color:#fff;background:#4a4a4a}
 .cat:hover .label,.cat:focus-visible .label{translate:0 -.25rem}
 .cat:active .label{scale:.96}
-.legal{z-index:2;position:absolute;right:.85rem;bottom:.7rem;display:flex;gap:.9rem}
-.legal a{color:#fff;letter-spacing:.1em;text-transform:uppercase;background:#000;padding:.28em .4em;font-size:.72rem;font-weight:200;text-decoration:none}
 .consent{z-index:80;position:fixed;right:1rem;bottom:1rem;left:1rem;max-width:36rem;margin:0 auto;padding:.85rem 1rem;display:flex;flex-wrap:wrap;gap:.7rem 1rem;align-items:center;justify-content:space-between;background:#141210f2;color:var(--color-fg);border:1px solid var(--color-line)}
 .consent p{margin:0;font-size:.9rem;line-height:1.4}
 .consent-actions{display:flex;gap:.45rem;align-items:center}
@@ -120,7 +118,7 @@ to{opacity:1;filter:blur();translate:0}
 .discipline-name{color:var(--color-accent);letter-spacing:.16em;text-transform:uppercase;margin:0;font-size:.68rem}
 .nav-links{scrollbar-width:none;flex:1;align-items:center;gap:.15rem;min-width:0;display:flex;overflow-x:auto}
 .nav-links::-webkit-scrollbar{display:none}
-.nav-link{min-height:2.75rem;color:var(--color-muted);font:inherit;letter-spacing:.08em;text-transform:uppercase;background:0 0;border:0;flex:none;padding:0 .55rem;font-size:.78rem}
+.nav-link{min-height:2.75rem;color:var(--color-muted);font:inherit;letter-spacing:.08em;text-transform:uppercase;background:0 0;border:0;flex:none;padding:0 .55rem;font-size:.78rem;text-decoration:none;display:inline-flex;align-items:center}
 .nav-link[aria-pressed=true],.nav-link:hover,.nav-link:focus-visible{color:var(--color-fg)}
 .nav-tools{flex:none;align-items:center;min-width:0;display:flex}
 .nav-tools.is-search{flex:1}
