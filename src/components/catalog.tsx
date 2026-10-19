@@ -196,8 +196,8 @@ function ShelfRow({
     const update = () => {
       const cards = node.querySelectorAll<HTMLElement>(".card");
       if (cards.length >= 2) {
-        const delta = cards[1].getBoundingClientRect().left - cards[0].getBoundingClientRect().left;
-        if (delta > 40 && Math.abs(delta - strideRef.current) > 0.5) {
+        const delta = Math.round(cards[1].getBoundingClientRect().left - cards[0].getBoundingClientRect().left);
+        if (delta > 40 && delta !== strideRef.current) {
           strideRef.current = delta;
           gapRef.current = parseFloat(getComputedStyle(node).columnGap || "0") || 0;
           setStride(delta);
@@ -422,7 +422,10 @@ export function CatalogScreen({ catalog, onNeedMore }: { catalog: Catalog; onNee
   }, [onNeedMore]);
 
   useEffect(() => {
-    const onScroll = () => setSolid(window.scrollY > 12);
+    const onScroll = () => {
+      const next = window.scrollY > 12;
+      setSolid((current) => (current === next ? current : next));
+    };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
