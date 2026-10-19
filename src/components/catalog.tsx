@@ -387,7 +387,7 @@ function Player({ film }: { film: Film }) {
   );
 }
 
-export function CatalogScreen({ catalog }: { catalog: Catalog }) {
+export function CatalogScreen({ catalog, onNeedMore }: { catalog: Catalog; onNeedMore?: () => void }) {
   const [view, setView] = useState("home");
   const [focus, setFocus] = useState<{ title: string; note?: string; parent?: string; filmIds: string[]; shelves?: RowShelf[] }[]>([]);
   const [query, setQuery] = useState("");
@@ -400,6 +400,7 @@ export function CatalogScreen({ catalog }: { catalog: Catalog }) {
   const [day, setDay] = useState(dayNumber);
   const searchRef = useRef<HTMLInputElement>(null);
   const saved = useSaved(catalog.id);
+  const more = useRef<HTMLDivElement>(null);
 
   const heroId = catalog.heroIds.length ? catalog.heroIds[day % catalog.heroIds.length] : catalog.featuredId;
   const hero = catalog.films[heroId] ?? catalog.films[catalog.featuredId];
@@ -409,6 +410,16 @@ export function CatalogScreen({ catalog }: { catalog: Catalog }) {
     const timer = window.setTimeout(() => setDay(dayNumber()), wait);
     return () => window.clearTimeout(timer);
   }, [day]);
+
+  useEffect(() => {
+    const node = more.current;
+    if (!node || !onNeedMore) return;
+    const observer = new IntersectionObserver((entries) => {
+      if (entries.some((entry) => entry.isIntersecting)) onNeedMore();
+    }, { rootMargin: "600px" });
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [onNeedMore]);
 
   useEffect(() => {
     const onScroll = () => setSolid(window.scrollY > 12);
@@ -439,8 +450,11 @@ export function CatalogScreen({ catalog }: { catalog: Catalog }) {
   }, [searching]);
 
   useEffect(() => {
-    if (query.trim().length >= 2) track("search", query.trim().toLowerCase());
-  }, [query]);
+    if (query.trim().length >= 2) {
+      onNeedMore?.();
+      track("search", query.trim().toLowerCase());
+    }
+  }, [query, onNeedMore]);
 
   useEffect(() => {
     if (playing && active) {
@@ -470,6 +484,7 @@ export function CatalogScreen({ catalog }: { catalog: Catalog }) {
   };
 
   const go = (id: string) => {
+    if (id !== "home" && !catalog.views[id]) onNeedMore?.();
     setView(id);
     setFocus([]);
     setQuery("");
@@ -706,6 +721,7 @@ export function CatalogScreen({ catalog }: { catalog: Catalog }) {
                 />
               );
             })}
+            {onNeedMore ? <div ref={more} className="row-more" aria-hidden="true" /> : null}
           </main>
         </>
       )}

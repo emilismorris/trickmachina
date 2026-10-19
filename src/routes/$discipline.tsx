@@ -1,8 +1,9 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { CatalogScreen } from "@/components/catalog";
 import type { Catalog } from "@/data/types";
 import { isHitKey } from "@/lib/hits";
+import { loadSectionShell } from "@/lib/section-shell";
 import { track } from "@/lib/track";
 import { pageHead } from "@/lib/seo";
 
@@ -12,8 +13,8 @@ const PAGES: Record<string, { title: string; description: string }> = {
     description: "2,090 skate videos, 1984–2026, sorted by era, team, brand and scene. Free to watch.",
   },
   bmx: {
-    title: "BMX Videos 1985–2027 — Trick Machina",
-    description: "20,899 BMX videos, 1985–2027, sorted by era, team and scene. Free to watch.",
+    title: "BMX Videos 1985–2026 — Trick Machina",
+    description: "20,898 BMX videos, 1985–2026, sorted by era, team and scene. Free to watch.",
   },
   blades: {
     title: "Blades Videos 1923–2026 — Trick Machina",
@@ -29,6 +30,7 @@ export const Route = createFileRoute("/$discipline")({
   beforeLoad: ({ params }) => {
     if (!PAGES[params.discipline]) throw notFound();
   },
+  loader: ({ params }) => loadSectionShell({ data: params.discipline }),
   head: ({ params }) => {
     const page = PAGES[params.discipline];
     if (!page) return { meta: [{ title: "Not found — Trick Machina" }] };
@@ -51,35 +53,36 @@ function NotFound() {
 
 function DisciplinePage() {
   const { discipline } = Route.useParams();
-  const [catalog, setCatalog] = useState<Catalog | null>(null);
+  const shell = Route.useLoaderData();
+  const [catalog, setCatalog] = useState<Catalog>(shell);
   const [failed, setFailed] = useState(false);
+  const ready = Object.keys(catalog.views).length > 0;
+
+  useEffect(() => {
+    setCatalog(shell);
+    setFailed(false);
+  }, [shell]);
 
   useEffect(() => {
     if (isHitKey(discipline)) track(discipline);
   }, [discipline]);
 
-  useEffect(() => {
-    if (!PAGES[discipline]) return;
-    let cancel = false;
-    setCatalog(null);
-    setFailed(false);
+  const loadFull = useCallback(() => {
+    if (ready) return;
     fetch(`/catalogs/${discipline}.json`)
       .then((response) => {
         if (!response.ok) throw new Error("missing");
         return response.json() as Promise<Catalog>;
       })
-      .then((data) => {
-        if (!cancel) setCatalog(data);
-      })
-      .catch(() => {
-        if (!cancel) setFailed(true);
-      });
-    return () => {
-      cancel = true;
-    };
-  }, [discipline]);
+      .then(setCatalog)
+      .catch(() => setFailed(true));
+  }, [discipline, ready]);
 
-  if (failed) {
+  useEffect(() => {
+    if (discipline !== "bmx") loadFull();
+  }, [discipline, loadFull]);
+
+  if (failed && !catalog.films[catalog.featuredId]) {
     return (
       <main className="status-screen">
         <h1>The catalog didn’t load.</h1>
@@ -89,15 +92,5 @@ function DisciplinePage() {
       </main>
     );
   }
-  if (!catalog) {
-    return (
-      <main className="status-screen" role="status" aria-label="Loading films">
-        <span className="skate-load" aria-hidden="true">
-          <img className="skate-board" src="/media/loader-board.png" alt="" />
-        </span>
-        <p>Loading the archive</p>
-      </main>
-    );
-  }
-  return <CatalogScreen catalog={catalog} />;
+  return <CatalogScreen catalog={catalog} onNeedMore={discipline === "bmx" && !ready ? loadFull : undefined} />;
 }

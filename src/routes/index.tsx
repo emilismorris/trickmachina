@@ -22,7 +22,6 @@ const DISCIPLINES = [
 
 function Home() {
   const desktop = useRef<HTMLVideoElement>(null);
-  const phone = useRef<HTMLVideoElement>(null);
   const [pressed, setPressed] = useState<string | null>(null);
   const [hover, setHover] = useState<string | null>(null);
   const active = DISCIPLINES.find((item) => item.id === (hover ?? pressed));
@@ -33,37 +32,14 @@ function Home() {
 
   useEffect(() => {
     const wide = desktop.current;
-    const narrow = phone.current;
-    if (!wide || !narrow) return;
+    if (!wide) return;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
     const small = window.matchMedia("(max-width: 767px)");
-    if (reduce.matches) {
-      wide.pause();
-      narrow.pause();
-      return;
-    }
-    const play = (video: HTMLVideoElement) => {
-      video.play().catch(() => {});
-    };
-    const current = () => (small.matches ? narrow : wide);
-    const sync = () => {
-      const next = current();
-      (next === narrow ? wide : narrow).pause();
-      play(next);
-    };
-    sync();
-    let frame = 0;
-    const tick = () => {
-      const video = current();
-      if (video.paused) play(video);
-      frame = window.requestAnimationFrame(tick);
-    };
-    frame = window.requestAnimationFrame(tick);
-    small.addEventListener("change", sync);
-    return () => {
-      window.cancelAnimationFrame(frame);
-      small.removeEventListener("change", sync);
-    };
+    const connection = (navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }).connection;
+    const slow = Boolean(connection?.saveData || connection?.effectiveType === "slow-2g" || connection?.effectiveType === "2g");
+    if (reduce.matches || small.matches || slow) return;
+    wide.src = "/media/park.mp4";
+    wide.play().catch(() => {});
   }, []);
 
   return (
@@ -71,20 +47,7 @@ function Home() {
       <video
         ref={desktop}
         className="bg-video bg-desktop"
-        src="/media/park.mp4"
-        poster="/media/park-poster.jpg"
-        autoPlay
-        muted
-        loop
-        playsInline
-        preload="none"
-        aria-hidden="true"
-      />
-      <video
-        ref={phone}
-        className="bg-video bg-phone"
-        src="/media/park.mp4"
-        poster="/media/park-poster.jpg"
+        poster="/media/park-poster.webp"
         muted
         loop
         playsInline
@@ -133,6 +96,7 @@ function Home() {
         </div>
       </div>
       <p className="legal">
+        <Link to="/about">About</Link>
         <Link to="/cookies">Cookies</Link>
       </p>
       <p className="sr-only" aria-live="polite">

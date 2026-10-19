@@ -65,6 +65,9 @@ export function appNameFromHost(hostHeader) {
     .trim()
     .split(":")[0]
     .toLowerCase();
+  if (host === "trickmachina.com" || host === "www.trickmachina.com" || host === "alphatrickmachina.grok.me") {
+    return "Trick Machina";
+  }
   if (!host.endsWith(".grok.me")) {
     return DEFAULT_APP_NAME;
   }
@@ -167,8 +170,8 @@ export function renderWebManifest(hostHeader) {
       start_url: "/",
       scope: "/",
       display: "standalone",
-      background_color: "#000000",
-      theme_color: "#000000",
+      background_color: "#1a1612",
+      theme_color: "#1a1612",
       icons: [
         {
           src: "/__grok/icon-180.png",
@@ -196,7 +199,7 @@ export function grokPwaHeadTags(appName = DEFAULT_APP_NAME) {
       "apple-mobile-web-app-status-bar-style",
       '<meta name="apple-mobile-web-app-status-bar-style" content="black">',
     ],
-    ["theme-color", '<meta name="theme-color" content="#000000">'],
+    ["theme-color", '<meta name="theme-color" content="#1a1612">'],
   ];
 }
 
@@ -309,10 +312,10 @@ export function resolveOgTitle(
   host = "",
   documentTitle = "",
 ) {
-  const fromSite = String(site.title ?? "").trim();
-  if (fromSite) return fromSite;
   const fromDoc = String(documentTitle ?? "").trim();
   if (fromDoc) return fromDoc;
+  const fromSite = String(site.title ?? "").trim();
+  if (fromSite) return fromSite;
   const fromHost = appNameFromHost(host);
   if (fromHost && fromHost !== DEFAULT_APP_NAME) return fromHost;
   const fromArg = String(appName ?? "").trim();
@@ -435,20 +438,34 @@ export function normalizeHeadContext(ctx = {}) {
   };
 }
 
+function readMeta(html, key) {
+  const tags = String(html).match(/<meta\b[^>]*>/gi) ?? [];
+  const want = key.toLowerCase();
+  for (const tag of tags) {
+    const name = tag.match(/\b(?:property|name)\s*=\s*["']([^"']+)["']/i)?.[1]?.toLowerCase();
+    if (name !== want) continue;
+    return tag.match(/\bcontent\s*=\s*["']([^"']*)["']/i)?.[1] ?? "";
+  }
+  return "";
+}
+
+function keepMeta(tags, html, key, property) {
+  if (tags.includes(`${property}="${key}"`)) return "";
+  const content = readMeta(html, key);
+  if (!content) return "";
+  return `<meta ${property}="${key}" content="${content}">`;
+}
+
 export function injectGrokPwaHead(html, ctx = {}) {
   if (typeof html !== "string") return html;
   const { site, projectId, creator, creatorId, host, cwd } = normalizeHeadContext(ctx);
   const documentTitle = titleFromDocument(html);
-  const appName = resolveOgTitle(
-    site,
-    ctx.appName ?? DEFAULT_APP_NAME,
-    host,
-    documentTitle,
-  );
+  const brand = resolveOgTitle(site, ctx.appName ?? DEFAULT_APP_NAME, host);
+  const appName = resolveOgTitle(site, ctx.appName ?? DEFAULT_APP_NAME, host, documentTitle);
   let next = stripShareMetaTags(html);
   if (!readGrokExtensionsEnabled()) next = stripGrokExtensionsScript(next);
 
-  const missing = grokPwaHeadTags(appName)
+  const missing = grokPwaHeadTags(brand)
     .filter(([key]) => {
       if (key === "manifest") return !next.includes('href="/__grok/manifest.webmanifest"');
       if (key === "apple-touch-icon") return !next.includes('href="/__grok/icon-180.png"');
@@ -456,10 +473,16 @@ export function injectGrokPwaHead(html, ctx = {}) {
     })
     .map(([, tag]) => tag);
 
-  next = insertAfterHeadOpen(
-    next,
-    grokOgHeadTags({ host, appName, site, documentTitle, cwd }).join(""),
-  );
+  const generated = grokOgHeadTags({ host, appName, site, documentTitle, cwd });
+  const og = [
+    ...generated,
+    keepMeta(generated.join(""), html, "og:description", "property"),
+    keepMeta(generated.join(""), html, "og:url", "property"),
+    keepMeta(generated.join(""), html, "twitter:title", "name"),
+    keepMeta(generated.join(""), html, "twitter:description", "name"),
+    keepMeta(generated.join(""), html, "twitter:image", "name"),
+  ].join("");
+  next = insertAfterHeadOpen(next, og);
 
   if (readGrokExtensionsEnabled() && !next.includes("/grok-app-builder/extensions.js")) {
     missing.push(...grokExtensionsHeadTags(projectId));

@@ -167,7 +167,17 @@ export default defineConfig(({ command, isPreview }) => ({
     // PWA head + ?install=1 tutorial page; runs before Start/Nitro.
     grokPwaPlugin(),
     tailwindcss(),
-    tanstackStart(),
+    tanstackStart({
+      pages: [
+        { path: "/", prerender: { enabled: true, crawlLinks: false } },
+        { path: "/skate", prerender: { enabled: true, crawlLinks: false } },
+        { path: "/bmx", prerender: { enabled: true, crawlLinks: false } },
+        { path: "/blades", prerender: { enabled: true, crawlLinks: false } },
+        { path: "/scoot", prerender: { enabled: true, crawlLinks: false } },
+        { path: "/about", prerender: { enabled: true, crawlLinks: false } },
+        { path: "/cookies", prerender: { enabled: true, crawlLinks: false } },
+      ],
+    }),
     ...(command === "build" || isPreview
       ? [
           nitro({

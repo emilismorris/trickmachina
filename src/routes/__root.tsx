@@ -26,21 +26,6 @@ export const Route = createRootRoute({
   component: () => (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(function(){
-  var host = location.hostname.toLowerCase();
-  if (host !== "trickmachina.com" && host !== "www.trickmachina.com" && host !== "alphatrickmachina.grok.me") return;
-  var s = document.createElement("script");
-  s.id = "Cookiebot";
-  s.src = "https://consent.cookiebot.com/uc.js";
-  s.async = true;
-  s.setAttribute("data-cbid", "e272238f-eb34-48f3-9ade-9622ba6dd921");
-  s.setAttribute("data-blockingmode", "auto");
-  document.head.appendChild(s);
-})();`,
-          }}
-        />
         <script async src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`} />
         <script
           dangerouslySetInnerHTML={{
