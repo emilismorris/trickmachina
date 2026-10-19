@@ -93,7 +93,10 @@ function Home() {
       />
       <div className="stack" data-ready="true">
         <div className="floor">
-          <h1 className="archive-title">The Archive</h1>
+          <div className="archive-head">
+            <h1 className="archive-title">The Archive</h1>
+            <p className="archive-line">The four disciplines. Free videos and films.</p>
+          </div>
           <section className="deck" aria-label="Choose a discipline">
           {DISCIPLINES.map((item) => {
             const handlers = {
@@ -129,6 +132,9 @@ function Home() {
           </section>
         </div>
       </div>
+      <p className="legal">
+        <Link to="/cookies">Cookies</Link>
+      </p>
       <p className="sr-only" aria-live="polite">
         {active ? active.gear : ""}
       </p>
