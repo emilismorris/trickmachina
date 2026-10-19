@@ -40,7 +40,13 @@ const PLACES: Record<string, { city: string; lat: number; lng: number }> = {
 /** Cities from the Analytics realtime view that are not the country stand-in. */
 const EXTRA_CITIES: MapPin[] = [
   { ip: "San Jose", hits: 1, lat: 37.3382, lng: -121.8863, place: "San Jose, United States" },
+  { ip: "Ashburn", hits: 1, lat: 39.0438, lng: -77.4874, place: "Ashburn, United States" },
+  { ip: "Seattle", hits: 1, lat: 47.6062, lng: -122.3321, place: "Seattle, United States" },
+  { ip: "Boardman", hits: 1, lat: 45.8399, lng: -119.7006, place: "Boardman, United States" },
   { ip: "Vilnius", hits: 1, lat: 54.6872, lng: 25.2797, place: "Vilnius, Lithuania" },
+  { ip: "Stockholm", hits: 1, lat: 59.3293, lng: 18.0686, place: "Stockholm, Sweden" },
+  { ip: "Frankfurt", hits: 1, lat: 50.1109, lng: 8.6821, place: "Frankfurt, Germany" },
+  { ip: "Frankfurt am Main", hits: 1, lat: 50.1155, lng: 8.6842, place: "Frankfurt am Main, Germany" },
 ];
 
 export type MapPin = {

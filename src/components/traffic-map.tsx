@@ -176,8 +176,6 @@ export function TrafficMap({ pins }: { pins: MapPin[] }) {
   const detailed = view.w < W / 4;
   const tiles = useMemo(() => (detailed ? streetTiles(view) : []), [detailed, view]);
   const labels = useMemo(() => {
-    const zoomed = view.w < W * 0.78;
-    if (!zoomed && !focus) return [];
     const groups = new Map<string, { x: number; y: number; n: number; text: string }>();
     for (const pin of placed) {
       if (pin.x < view.x || pin.x > view.x + view.w || pin.y < view.y || pin.y > view.y + view.h) continue;
@@ -195,7 +193,7 @@ export function TrafficMap({ pins }: { pins: MapPin[] }) {
       row.n += 1;
       groups.set(id, row);
     }
-    if (!focus && groups.size > 16) return [];
+    if (!focus && groups.size > 24) return [];
     const rows = [...groups.entries()].map(([id, row]) => ({ id, x: row.x / row.n, y: row.y / row.n, text: row.text }));
     rows.sort((a, b) => a.y - b.y || a.x - b.x);
     const gap = view.h * 0.065;
