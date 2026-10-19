@@ -1,7 +1,55 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { hashPassword } from "better-auth/crypto";
 import { ADMIN_EMAIL } from "@/lib/admin-email";
 import { previewPrefixCookie, previewPrefixFrom, withPreviewAuthBase } from "@/lib/auth/preview-base.server";
 import { auth } from "@/lib/auth/server";
+import { getSql } from "@/lib/db";
+
+function requestHost(request: Request): string {
+  const raw = request.headers.get("x-forwarded-host") || request.headers.get("host") || "";
+  return raw.split(",")[0]?.trim().replace(/:\d+$/, "").toLowerCase() ?? "";
+}
+
+/** The published preview keeps its own admin password, separate from trickmachina.com. */
+function canReplaceAdminPassword(host: string): boolean {
+  return host.endsWith(".grok.me") || host === "grok.me" || host === "localhost" || host === "127.0.0.1";
+}
+
+async function replacePreviewPassword(request: Request): Promise<Response | null> {
+  const path = new URL(request.url).pathname;
+  if (request.method !== "POST" || !path.endsWith("/admin-password")) return null;
+  if (!canReplaceAdminPassword(requestHost(request))) {
+    return Response.json({ message: "This address keeps its saved password." }, { status: 403 });
+  }
+  let password = "";
+  try {
+    const body = (await request.json()) as { password?: unknown };
+    password = typeof body.password === "string" ? body.password : "";
+  } catch {
+    password = "";
+  }
+  if (password.length < 8 || password.length > 128) {
+    return Response.json({ message: "Use at least 8 characters." }, { status: 400 });
+  }
+  const sql = await getSql();
+  const users = await sql<{ id: string }>`select id from "user" where lower(email) = ${ADMIN_EMAIL} limit 1`;
+  const user = users[0];
+  if (!user) return Response.json({ message: "No admin yet." }, { status: 404 });
+  const hash = await hashPassword(password);
+  const accounts = await sql<{ id: string }>`
+    select id from "account" where "userId" = ${user.id} and "providerId" = 'credential' limit 1
+  `;
+  if (accounts[0]) {
+    await sql`update "account" set password = ${hash}, "updatedAt" = now() where id = ${accounts[0].id}`;
+  } else {
+    const id = crypto.randomUUID();
+    await sql`
+      insert into "account" ("id", "accountId", "providerId", "userId", "password", "createdAt", "updatedAt")
+      values (${id}, ${user.id}, 'credential', ${user.id}, ${hash}, now(), now())
+    `;
+  }
+  return Response.json({ ok: true });
+}
 
 async function rejectOtherAdmins(request: Request) {
   if (request.method !== "POST") return null;
@@ -35,6 +83,8 @@ function withPrefixCookie(response: Response, prefix: string): Response {
 
 async function handleAuth(request: Request): Promise<Response> {
   try {
+    const replaced = await replacePreviewPassword(request);
+    if (replaced) return replaced;
     const prefix = previewPrefixFrom(request);
     const response = await withPreviewAuthBase(prefix, request, (next) => auth.handler(next));
     return prefix ? withPrefixCookie(response, prefix) : response;

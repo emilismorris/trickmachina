@@ -233,13 +233,21 @@ to{opacity:1;filter:blur();translate:0}
 .stat p{color:var(--color-muted);letter-spacing:.12em;text-transform:uppercase;margin:0;font-size:.68rem}
 .stat strong{letter-spacing:-.03em;font-variant-numeric:tabular-nums;font-size:clamp(1.8rem,4vw,2.6rem);font-weight:300}
 .admin-block{margin-top:2.1rem}
-.admin-block h2{letter-spacing:.02em;margin:0 0 .9rem;font-size:1.35rem;font-weight:300}
+.admin-block h2,.map-title{letter-spacing:.02em;margin:0 0 .9rem;font-size:1.35rem;font-weight:300}
+.map-title{margin-top:1.6rem}
+.block-head{justify-content:space-between;align-items:baseline;gap:1rem;margin-bottom:.9rem;display:flex}
+.block-head h2{margin:0}
+.block-head strong{font-variant-numeric:tabular-nums;font-size:1.35rem;font-weight:400}
+.engage{color:var(--color-muted);margin:.85rem 0 0;font-size:.95rem}
+.engage strong{color:var(--color-fg);letter-spacing:-.02em;margin-left:.35rem;font-size:1.35rem;font-weight:400}
 .hit-list{flex-direction:column;gap:.7rem;margin:0;padding:0;list-style:none;display:flex}
 .hit-list li{grid-template-columns:8.5rem 1fr auto;align-items:center;gap:.75rem;font-size:.92rem;display:grid}
 .hit-track{background:var(--color-line);height:2px}
 .hit-track span{background:var(--color-fg);height:100%;display:block}
 .hit-list strong{font-variant-numeric:tabular-nums;font-weight:500}
-.path-list li{grid-template-columns:minmax(0,1.2fr) minmax(0,.8fr) 1fr auto}
+.path-list li{grid-template-columns:minmax(0,1.4fr) minmax(5.5rem,.7fr) 1fr auto}
+.country-list li{grid-template-columns:8.5rem 3.2rem 1fr auto}
+.share{color:var(--color-muted);font-variant-numeric:tabular-nums;font-size:.82rem}
 .screen-class{color:var(--color-muted)}
 .admin-block h3{letter-spacing:.08em;text-transform:uppercase;color:var(--color-muted);margin:1.4rem 0 .7rem;font-size:.72rem;font-weight:500}
 .range{flex-wrap:wrap;gap:.4rem;margin:.9rem 0 1rem;display:flex}
@@ -301,8 +309,8 @@ to{opacity:1;filter:blur();translate:0}
 .admin-wrap{padding:1.25rem 1rem 3rem}
 }
 @media (width<=640px){.hit-list li{grid-template-columns:1fr auto}
-.path-list li{grid-template-columns:minmax(0,1fr) auto}
-.screen-class{display:none}
+.path-list li,.country-list li{grid-template-columns:minmax(0,1fr) auto}
+.screen-class,.share{display:none}
 .hit-track{display:none}
 .pin-list button{grid-template-columns:1fr auto}
 .pin-place{grid-column:1;grid-row:2}

@@ -21,6 +21,12 @@ export const Route = createFileRoute("/login")({
   component: Login,
 });
 
+function previewPasswordHost() {
+  if (typeof window === "undefined") return false;
+  const host = window.location.hostname.toLowerCase();
+  return host.endsWith(".grok.me") || host === "grok.me" || host === "localhost" || host === "127.0.0.1";
+}
+
 function PasswordSignIn() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -36,6 +42,26 @@ function PasswordSignIn() {
       window.location.assign("/admin");
       return;
     }
+    if (previewPasswordHost()) {
+      const saved = await fetch("/api/auth/admin-password", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ password }),
+      });
+      if (saved.ok) {
+        const again = await authClient.signIn.email({ email, password, callbackURL: "/admin" });
+        if (!again.error) {
+          window.location.assign("/admin");
+          return;
+        }
+      } else if (saved.status !== 404) {
+        const body = (await saved.json().catch(() => null)) as { message?: string } | null;
+        setBusy(false);
+        setError(body?.message || signed.error.message || "Sign-in didn’t finish.");
+        return;
+      }
+    }
     const created = await authClient.signUp.email({ email, password, name: "Admin", callbackURL: "/admin" });
     if (!created.error) {
       window.location.assign("/admin");
@@ -43,12 +69,16 @@ function PasswordSignIn() {
     }
     setBusy(false);
     const message = created.error.message ?? "";
-    setError(/exist/i.test(message) ? "Wrong password." : message || "Sign-in didn’t finish.");
+    setError(
+      /exist/i.test(message)
+        ? "Wrong password for this address. The preview and trickmachina.com keep separate passwords."
+        : message || signed.error.message || "Sign-in didn’t finish.",
+    );
   }
 
   return (
     <form onSubmit={submit}>
-      <style>{".admin-pass{width:100%;min-height:2.75rem;margin-top:1rem;color:inherit;background:transparent;border:1px solid #3a342e;font:inherit;padding:0 .8rem}"}</style>
+      <style>{`.admin-pass{width:100%;min-height:2.75rem;margin-top:1rem;color:inherit;background:transparent;border:1px solid #3a342e;font:inherit;padding:0 .8rem}`}</style>
       <input
         className="admin-pass"
         type="password"
@@ -96,7 +126,9 @@ function Login() {
       <section className="admin-card">
         <p className="kicker">Admin</p>
         <h1>Sign in</h1>
-        <p className="admin-note">Google can’t return to this domain. Choose a password. The first time creates the admin account.</p>
+        <p className="admin-note">
+          Google can’t return here. The password is saved on this address only — trickmachina.com and the preview each have their own.
+        </p>
         {refused ? <p className="admin-warn">That account isn’t the admin. It was signed out.</p> : null}
         {user && !admin ? <p className="admin-warn">This account isn’t the admin. Switch accounts.</p> : null}
         <PasswordSignIn />
