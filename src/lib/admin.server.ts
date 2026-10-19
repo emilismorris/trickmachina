@@ -168,15 +168,7 @@ export async function loadAdminDashboard(userId: string, range: VisitRange) {
     browsers,
     languages,
   };
-  const notes = await optional(
-    sql<{ id: number; name: string; email: string; message: string; created_at: string }>`
-      select id, name, email, message, created_at::text as created_at
-      from contact_note
-      order by id desc
-      limit 40
-    `,
-    [],
-  );
+  const notes = await optional(loadNotes(sql), []);
   return {
     email,
     traffic,
@@ -186,4 +178,25 @@ export async function loadAdminDashboard(userId: string, range: VisitRange) {
     report,
     notes,
   };
+}
+
+async function loadNotes(sql: Awaited<ReturnType<typeof getSql>>) {
+  await sql`alter table contact_note add column if not exists archived boolean not null default false`;
+  return sql<{ id: number; name: string; email: string; message: string; created_at: string }>`
+    select id, name, email, message, created_at::text as created_at
+    from contact_note
+    where archived = false
+    order by id desc
+    limit 200
+  `;
+}
+
+export async function hideNotes(userId: string, ids: number[]) {
+  const sql = await getSql();
+  const users = await sql<{ email: string }>`select email from "user" where id = ${userId}`;
+  if (!isAdminEmail(users[0]?.email)) throw new Error("Forbidden");
+  await sql`alter table contact_note add column if not exists archived boolean not null default false`;
+  for (const id of ids) {
+    await sql`update contact_note set archived = true where id = ${id}`;
+  }
 }

@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { AdminGoogleButton } from "@/components/admin-google";
 import { TrafficMap } from "@/components/traffic-map";
 import { isAdminEmail } from "@/lib/admin-email";
-import { getAdminDashboard, type VisitRange } from "@/lib/admin.functions";
+import { getAdminDashboard, archiveNotes, type VisitRange } from "@/lib/admin.functions";
 import { signOut } from "@/lib/auth/client";
 import { hasGateSessionMarker } from "@/lib/auth/gate-session-marker";
 import { RedirectToSignIn, UserButton } from "@/lib/auth/gates";
@@ -35,6 +35,84 @@ const PAGES: Record<string, { title: string; screen: string }> = {
 
 function pageMeta(path: string) {
   return PAGES[path] ?? { title: path, screen: "Page" };
+}
+
+type DeskNote = NonNullable<Dashboard["notes"]>[number];
+
+function noteWhen(value: string) {
+  const match = value.match(/^(\d{4}-\d{2}-\d{2})[ T](\d{2}:\d{2})/);
+  return match ? `${match[1].slice(5)} ${match[2]}` : value.slice(0, 16);
+}
+
+function NotesInbox({ notes, onHide }: { notes: DeskNote[]; onHide: (ids: number[]) => void }) {
+  const [query, setQuery] = useState("");
+  const [open, setOpen] = useState<string | null>(null);
+  const q = query.trim().toLowerCase();
+  const shown = q ? notes.filter((note) => `${note.name} ${note.email} ${note.message}`.toLowerCase().includes(q)) : notes;
+  const groups = new Map<string, DeskNote[]>();
+  for (const note of shown) {
+    const key = note.email.trim().toLowerCase();
+    const list = groups.get(key);
+    if (list) list.push(note);
+    else groups.set(key, [note]);
+  }
+
+  return (
+    <section className="admin-block notes-block">
+      <div className="block-head">
+        <h2>Notes</h2>
+        <strong>{notes.length}</strong>
+      </div>
+      {notes.length === 0 ? (
+        <p className="admin-note">None yet.</p>
+      ) : (
+        <>
+          {notes.length > 4 ? (
+            <input
+              className="note-search"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Search"
+              aria-label="Search notes"
+            />
+          ) : null}
+          <ul className="note-list">
+            {[...groups.entries()].map(([key, thread]) => {
+              const latest = thread[0];
+              const expanded = open === key;
+              const preview = latest.message.replace(/\s+/g, " ");
+              return (
+                <li key={key}>
+                  <div className="note-line">
+                    <button type="button" className="note-row" aria-expanded={expanded} onClick={() => setOpen(expanded ? null : key)}>
+                      <span className="note-who">{latest.name}</span>
+                      <span className="note-mail">{latest.email}</span>
+                      <span className="note-preview">{preview}</span>
+                      {thread.length > 1 ? <span className="note-count">{thread.length}</span> : null}
+                    </button>
+                    <button type="button" className="note-hide" onClick={() => onHide(thread.map((note) => note.id))}>
+                      Hide
+                    </button>
+                  </div>
+                  {expanded ? (
+                    <ul className="note-thread">
+                      {thread.map((note) => (
+                        <li key={note.id}>
+                          <time dateTime={note.created_at}>{noteWhen(note.created_at)}</time>
+                          <p>{note.message}</p>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
+                </li>
+              );
+            })}
+          </ul>
+          {shown.length === 0 ? <p className="admin-note">Nothing under that.</p> : null}
+        </>
+      )}
+    </section>
+  );
 }
 
 function sourceMedium(label: string) {
@@ -130,24 +208,13 @@ function AdminPage() {
       <div className="admin-wrap">
         <p className="kicker">{data?.email ?? user.primaryEmail}</p>
         <h1>Desk</h1>
-        <section className="admin-block">
-          <h2>Notes</h2>
-          {(data?.notes ?? []).length === 0 ? (
-            <p className="admin-note">None yet.</p>
-          ) : (
-            <ul className="note-list">
-              {data?.notes.map((note) => (
-                <li key={note.id}>
-                  <p>
-                    <strong>{note.name}</strong>
-                    <a href={`mailto:${note.email}`}>{note.email}</a>
-                  </p>
-                  <p>{note.message}</p>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
+        <NotesInbox
+          notes={data?.notes ?? []}
+          onHide={(ids) => {
+            setData((current) => (current ? { ...current, notes: current.notes.filter((note) => !ids.includes(note.id)) } : current));
+            void archiveNotes({ data: ids }).catch(() => {});
+          }}
+        />
         <p className="admin-note">
           {rangeLabel}. {stats.users.toLocaleString("en-US")} active users, {stats.views.toLocaleString("en-US")} visits.
         </p>

@@ -77,3 +77,17 @@ export const getAdminDashboard = createServerFn({ method: "GET" })
     const { loadAdminDashboard } = await import("./admin.server");
     return loadAdminDashboard(context.userId, data);
   });
+
+export const archiveNotes = createServerFn({ method: "POST" })
+  .middleware([authMiddleware])
+  .validator((ids: unknown): number[] => {
+    if (!Array.isArray(ids)) throw new Error("No notes");
+    const clean = ids.filter((id): id is number => Number.isInteger(id) && id > 0).slice(0, 100);
+    if (!clean.length) throw new Error("No notes");
+    return clean;
+  })
+  .handler(async ({ data, context }) => {
+    const { hideNotes } = await import("./admin.server");
+    await hideNotes(context.userId, data);
+    return { ok: true as const };
+  });
