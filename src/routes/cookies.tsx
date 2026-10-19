@@ -15,7 +15,7 @@ function Cookies() {
       <h1>Cookies</h1>
       <p>Trick Machina uses Google Analytics only, to count visits. We don’t set advertising cookies.</p>
       <p>
-        Questions: <a href="mailto:emil@trickmachina.com">emil@trickmachina.com</a>.
+        <Link to="/contact">Questions</Link>
       </p>
     </main>
   );

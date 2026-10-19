@@ -548,6 +548,9 @@ export function CatalogScreen({ catalog, onNeedMore }: { catalog: Catalog; onNee
               {item.label}
             </button>
           ))}
+          <Link to="/contact" className="nav-link" onClick={() => setMenu(false)}>
+            Contact
+          </Link>
           <Link to="/about" className="nav-link" onClick={() => setMenu(false)}>
             About
           </Link>

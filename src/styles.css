@@ -98,6 +98,12 @@ to{opacity:1;translate:0}
 .cookies{background:#f4efe8;color:#1a1612;min-height:100dvh;padding:2rem 1.1rem 4rem}
 .cookies h1{letter-spacing:.14em;text-transform:uppercase;font-size:1.35rem;font-weight:300}
 .cookies>p a{color:inherit}
+.contact-form{flex-direction:column;gap:.75rem;max-width:28rem;margin-top:1.2rem;display:flex}
+.contact-form label{flex-direction:column;gap:.3rem;font-size:.85rem;display:flex}
+.contact-form input,.contact-form textarea{color:#1a1612;font:inherit;background:#fff;border:1px solid #c9c1b6;padding:.6rem .7rem}
+.contact-form textarea{min-height:8rem;resize:vertical}
+.contact-form button{align-self:flex-start;min-height:2.6rem;color:#f3eadc;font:inherit;background:#141210;border:0;padding:0 .9rem}
+.contact-honey{position:absolute;left:-9999px}
 .soon-deck{width:min(100%,16rem);padding:0 .75rem;position:absolute;top:50%;left:50%;translate:-50% -50%}
 .soon-back{color:var(--color-fg);letter-spacing:.12em;text-transform:uppercase;text-shadow:0 1px 2px #000000e6;font-size:.75rem;text-decoration:none;position:absolute;bottom:1.4rem;left:50%;translate:-50%}
 .soon-back:hover,.soon-back:focus-visible{color:var(--color-ink);background:var(--color-fg);text-shadow:none}
