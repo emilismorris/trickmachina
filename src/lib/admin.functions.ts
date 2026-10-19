@@ -80,14 +80,16 @@ export const getAdminDashboard = createServerFn({ method: "GET" })
 
 export const archiveNotes = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
-  .validator((ids: unknown): number[] => {
-    if (!Array.isArray(ids)) throw new Error("No notes");
-    const clean = ids.filter((id): id is number => Number.isInteger(id) && id > 0).slice(0, 100);
-    if (!clean.length) throw new Error("No notes");
-    return clean;
+  .validator((input: unknown): { ids: number[]; hidden: boolean } => {
+    if (!input || typeof input !== "object") throw new Error("No notes");
+    const body = input as { ids?: unknown; hidden?: unknown };
+    if (!Array.isArray(body.ids)) throw new Error("No notes");
+    const ids = body.ids.filter((id): id is number => Number.isInteger(id) && id > 0).slice(0, 100);
+    if (!ids.length) throw new Error("No notes");
+    return { ids, hidden: body.hidden !== false };
   })
   .handler(async ({ data, context }) => {
     const { hideNotes } = await import("./admin.server");
-    await hideNotes(context.userId, data);
+    await hideNotes(context.userId, data.ids, data.hidden);
     return { ok: true as const };
   });

@@ -168,7 +168,7 @@ export async function loadAdminDashboard(userId: string, range: VisitRange) {
     browsers,
     languages,
   };
-  const notes = await optional(loadNotes(sql), []);
+  const notes = await optional(loadNotes(sql), { open: [], hidden: [] });
   return {
     email,
     traffic,
@@ -182,21 +182,28 @@ export async function loadAdminDashboard(userId: string, range: VisitRange) {
 
 async function loadNotes(sql: Awaited<ReturnType<typeof getSql>>) {
   await sql`alter table contact_note add column if not exists archived boolean not null default false`;
-  return sql<{ id: number; name: string; email: string; message: string; created_at: string }>`
-    select id, name, email, message, created_at::text as created_at
+  const rows = await sql<{ id: number; name: string; email: string; message: string; created_at: string; archived: boolean }>`
+    select id, name, email, message, created_at::text as created_at, archived
     from contact_note
-    where archived = false
     order by id desc
-    limit 200
+    limit 400
   `;
+  const open = [];
+  const hidden = [];
+  for (const row of rows) {
+    const note = { id: row.id, name: row.name, email: row.email, message: row.message, created_at: row.created_at };
+    if (row.archived) hidden.push(note);
+    else open.push(note);
+  }
+  return { open, hidden };
 }
 
-export async function hideNotes(userId: string, ids: number[]) {
+export async function hideNotes(userId: string, ids: number[], hidden = true) {
   const sql = await getSql();
   const users = await sql<{ email: string }>`select email from "user" where id = ${userId}`;
   if (!isAdminEmail(users[0]?.email)) throw new Error("Forbidden");
   await sql`alter table contact_note add column if not exists archived boolean not null default false`;
   for (const id of ids) {
-    await sql`update contact_note set archived = true where id = ${id}`;
+    await sql`update contact_note set archived = ${hidden} where id = ${id}`;
   }
 }

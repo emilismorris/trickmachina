@@ -37,16 +37,26 @@ function pageMeta(path: string) {
   return PAGES[path] ?? { title: path, screen: "Page" };
 }
 
-type DeskNote = NonNullable<Dashboard["notes"]>[number];
+type DeskNote = { id: number; name: string; email: string; message: string; created_at: string };
 
 function noteWhen(value: string) {
   const match = value.match(/^(\d{4}-\d{2}-\d{2})[ T](\d{2}:\d{2})/);
   return match ? `${match[1].slice(5)} ${match[2]}` : value.slice(0, 16);
 }
 
-function NotesInbox({ notes, onHide }: { notes: DeskNote[]; onHide: (ids: number[]) => void }) {
+function NotesCard({
+  openNotes,
+  hiddenNotes,
+  onMove,
+}: {
+  openNotes: DeskNote[];
+  hiddenNotes: DeskNote[];
+  onMove: (ids: number[], hidden: boolean) => void;
+}) {
+  const [pile, setPile] = useState<"open" | "hidden">("open");
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState<string | null>(null);
+  const notes = pile === "open" ? openNotes : hiddenNotes;
   const q = query.trim().toLowerCase();
   const shown = q ? notes.filter((note) => `${note.name} ${note.email} ${note.message}`.toLowerCase().includes(q)) : notes;
   const groups = new Map<string, DeskNote[]>();
@@ -58,24 +68,29 @@ function NotesInbox({ notes, onHide }: { notes: DeskNote[]; onHide: (ids: number
   }
 
   return (
-    <section className="admin-block notes-block">
+    <section className="notes-card" aria-label="Notes">
       <div className="block-head">
         <h2>Notes</h2>
-        <strong>{notes.length}</strong>
+        <div className="note-tabs" role="tablist">
+          <button type="button" role="tab" aria-selected={pile === "open"} className={pile === "open" ? "is-on" : ""} onClick={() => setPile("open")}>
+            Open {openNotes.length}
+          </button>
+          <button type="button" role="tab" aria-selected={pile === "hidden"} className={pile === "hidden" ? "is-on" : ""} onClick={() => setPile("hidden")}>
+            Hidden {hiddenNotes.length}
+          </button>
+        </div>
       </div>
       {notes.length === 0 ? (
-        <p className="admin-note">None yet.</p>
+        <p className="admin-note">{pile === "open" ? "None yet." : "Nothing hidden."}</p>
       ) : (
         <>
-          {notes.length > 4 ? (
-            <input
-              className="note-search"
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search"
-              aria-label="Search notes"
-            />
-          ) : null}
+          <input
+            className="note-search"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Search"
+            aria-label="Search notes"
+          />
           <ul className="note-list">
             {[...groups.entries()].map(([key, thread]) => {
               const latest = thread[0];
@@ -90,8 +105,8 @@ function NotesInbox({ notes, onHide }: { notes: DeskNote[]; onHide: (ids: number
                       <span className="note-preview">{preview}</span>
                       {thread.length > 1 ? <span className="note-count">{thread.length}</span> : null}
                     </button>
-                    <button type="button" className="note-hide" onClick={() => onHide(thread.map((note) => note.id))}>
-                      Hide
+                    <button type="button" className="note-hide" onClick={() => onMove(thread.map((note) => note.id), pile === "open")}>
+                      {pile === "open" ? "Hide" : "Unhide"}
                     </button>
                   </div>
                   {expanded ? (
@@ -208,11 +223,21 @@ function AdminPage() {
       <div className="admin-wrap">
         <p className="kicker">{data?.email ?? user.primaryEmail}</p>
         <h1>Desk</h1>
-        <NotesInbox
-          notes={data?.notes ?? []}
-          onHide={(ids) => {
-            setData((current) => (current ? { ...current, notes: current.notes.filter((note) => !ids.includes(note.id)) } : current));
-            void archiveNotes({ data: ids }).catch(() => {});
+        <NotesCard
+          openNotes={data?.notes.open ?? []}
+          hiddenNotes={data?.notes.hidden ?? []}
+          onMove={(ids, hidden) => {
+            setData((current) => {
+              if (!current) return current;
+              const moving = new Set(ids);
+              const taken = [...current.notes.open, ...current.notes.hidden].filter((note) => moving.has(note.id));
+              const open = current.notes.open.filter((note) => !moving.has(note.id));
+              const filed = current.notes.hidden.filter((note) => !moving.has(note.id));
+              if (hidden) filed.unshift(...taken);
+              else open.unshift(...taken);
+              return { ...current, notes: { open, hidden: filed } };
+            });
+            void archiveNotes({ data: { ids, hidden } }).catch(() => {});
           }}
         />
         <p className="admin-note">
