@@ -82,6 +82,10 @@ to{opacity:1;filter:blur();translate:0}
 .legal{z-index:2;position:absolute;right:.85rem;bottom:.7rem}
 .legal a{color:#f3eadcb8;letter-spacing:.08em;text-transform:uppercase;text-shadow:0 1px 2px #000;font-size:.68rem;text-decoration:none}
 #CookiebotWidget{display:none !important}
+.consent{z-index:40;position:fixed;right:1rem;bottom:1rem;left:1rem;max-width:36rem;margin:0 auto;padding:.85rem 1rem;display:flex;flex-wrap:wrap;gap:.7rem 1rem;align-items:center;justify-content:space-between;background:#141210f2;color:var(--color-fg);border:1px solid var(--color-line)}
+.consent p{margin:0;font-size:.9rem;line-height:1.4}
+.consent-actions{display:flex;gap:.45rem;align-items:center}
+.consent-actions button,.consent-actions a{min-height:2.4rem;padding:0 .7rem;font:inherit;color:var(--color-fg);background:transparent;border:1px solid var(--color-line);text-decoration:none;display:inline-flex;align-items:center}
 .cookies{background:#f4efe8;color:#1a1612;min-height:100dvh;padding:2rem 1.1rem 4rem}
 .cookies h1{letter-spacing:.14em;text-transform:uppercase;font-size:1.35rem;font-weight:300}
 .cookies>p a{color:inherit}

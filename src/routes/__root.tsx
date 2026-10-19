@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { createRootRoute, HeadContent, Link, Outlet, Scripts, useRouterState } from "@tanstack/react-router";
 import { AuthProvider } from "@/lib/auth/provider";
 import { PreviewHostBridge } from "@/components/preview-host-bridge";
+import { ConsentBanner } from "@/components/consent";
 import { GA_ID, trackPage } from "@/lib/ga";
 import { collectVisit } from "@/lib/visit";
 import appCss from "../styles.css?url";
@@ -26,11 +27,19 @@ export const Route = createRootRoute({
     <html lang="en" suppressHydrationWarning>
       <head>
         <script
-          id="Cookiebot"
-          src="https://consent.cookiebot.com/uc.js"
-          data-cbid="e272238f-eb34-48f3-9ade-9622ba6dd921"
-          data-blockingmode="auto"
-          type="text/javascript"
+          dangerouslySetInnerHTML={{
+            __html: `(function(){
+  var host = location.hostname.toLowerCase();
+  if (host !== "trickmachina.com" && host !== "www.trickmachina.com" && host !== "alphatrickmachina.grok.me") return;
+  var s = document.createElement("script");
+  s.id = "Cookiebot";
+  s.src = "https://consent.cookiebot.com/uc.js";
+  s.async = true;
+  s.setAttribute("data-cbid", "e272238f-eb34-48f3-9ade-9622ba6dd921");
+  s.setAttribute("data-blockingmode", "auto");
+  document.head.appendChild(s);
+})();`,
+          }}
         />
         <script async src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`} />
         <script
@@ -47,6 +56,7 @@ gtag('config', 'G-83KS7WNY4P');`,
         <NoPullRefresh />
         <Analytics />
         <PreviewHostBridge />
+        <ConsentBanner />
         <AuthProvider>
           <Outlet />
         </AuthProvider>

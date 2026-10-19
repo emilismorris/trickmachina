@@ -4,15 +4,16 @@ import { ADMIN_EMAIL } from "@/lib/admin-email";
 import { previewPrefixCookie, previewPrefixFrom, withPreviewAuthBase } from "@/lib/auth/preview-base.server";
 import { auth } from "@/lib/auth/server";
 import { getSql } from "@/lib/db";
+import { previewPasswordHostName } from "@/lib/preview-password-host";
 
 function requestHost(request: Request): string {
   const raw = request.headers.get("x-forwarded-host") || request.headers.get("host") || "";
   return raw.split(",")[0]?.trim().replace(/:\d+$/, "").toLowerCase() ?? "";
 }
 
-/** The published preview keeps its own admin password, separate from trickmachina.com. */
+/** The preview keeps its own admin password, separate from trickmachina.com. */
 function canReplaceAdminPassword(host: string): boolean {
-  return host.endsWith(".grok.me") || host === "grok.me" || host === "localhost" || host === "127.0.0.1";
+  return previewPasswordHostName(host);
 }
 
 async function replacePreviewPassword(request: Request): Promise<Response | null> {

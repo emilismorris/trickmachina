@@ -1,7 +1,8 @@
 import { createFileRoute, Link, Navigate, stripSearchParams } from "@tanstack/react-router";
 import { useEffect, useState, type FormEvent } from "react";
 import { isAdminEmail } from "@/lib/admin-email";
-import { authClient, signOut } from "@/lib/auth/client";
+import { authClient, rememberSessionToken, signOut } from "@/lib/auth/client";
+import { previewPasswordHostName } from "@/lib/preview-password-host";
 import { hasGateSessionMarker } from "@/lib/auth/gate-session-marker";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
 
@@ -23,8 +24,12 @@ export const Route = createFileRoute("/login")({
 
 function previewPasswordHost() {
   if (typeof window === "undefined") return false;
-  const host = window.location.hostname.toLowerCase();
-  return host.endsWith(".grok.me") || host === "grok.me" || host === "localhost" || host === "127.0.0.1";
+  return previewPasswordHostName(window.location.hostname);
+}
+
+function keepSession(result: { data?: { token?: string | null } | null }) {
+  const token = result.data?.token;
+  if (token) rememberSessionToken(token);
 }
 
 function PasswordSignIn() {
@@ -39,6 +44,7 @@ function PasswordSignIn() {
     const email = "emil@trickmachina.com";
     const signed = await authClient.signIn.email({ email, password, callbackURL: "/admin" });
     if (!signed.error) {
+      keepSession(signed);
       window.location.assign("/admin");
       return;
     }
@@ -52,6 +58,7 @@ function PasswordSignIn() {
       if (saved.ok) {
         const again = await authClient.signIn.email({ email, password, callbackURL: "/admin" });
         if (!again.error) {
+          keepSession(again);
           window.location.assign("/admin");
           return;
         }
@@ -64,6 +71,7 @@ function PasswordSignIn() {
     }
     const created = await authClient.signUp.email({ email, password, name: "Admin", callbackURL: "/admin" });
     if (!created.error) {
+      keepSession(created);
       window.location.assign("/admin");
       return;
     }
