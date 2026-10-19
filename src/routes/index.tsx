@@ -34,24 +34,32 @@ function Home() {
     const wide = desktop.current;
     if (!wide) return;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const small = window.matchMedia("(max-width: 767px)");
-    const connection = (navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }).connection;
-    const slow = Boolean(connection?.saveData || connection?.effectiveType === "slow-2g" || connection?.effectiveType === "2g");
-    if (reduce.matches || small.matches || slow) return;
-    wide.src = "/media/park.mp4";
-    wide.play().catch(() => {});
+    const connection = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
+    if (reduce.matches || connection?.saveData) {
+      wide.removeAttribute("src");
+      wide.load();
+      return;
+    }
+    const start = () => {
+      wide.play().catch(() => {});
+    };
+    if (wide.readyState >= 2) start();
+    else wide.addEventListener("canplay", start, { once: true });
+    return () => wide.removeEventListener("canplay", start);
   }, []);
 
   return (
     <main className="stage">
       <video
         ref={desktop}
-        className="bg-video bg-desktop"
+        className="bg-video"
+        src="/media/park.mp4"
         poster="/media/park-poster.webp"
         muted
         loop
         playsInline
-        preload="none"
+        autoPlay
+        preload="auto"
         aria-hidden="true"
       />
       <div className="stack" data-ready="true">
