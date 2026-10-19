@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { startAnalytics } from "@/lib/ga";
 
 const KEY = "tm-consent";
 
@@ -24,6 +25,7 @@ export function ConsentBanner() {
   const choose = (value: "yes" | "no") => {
     writeChoice(value);
     setOpen(false);
+    if (value === "yes") startAnalytics();
   };
 
   return (

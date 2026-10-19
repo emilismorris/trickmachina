@@ -588,9 +588,6 @@ export function CatalogScreen({ catalog, onNeedMore }: { catalog: Catalog; onNee
           )}
         </div>
       </header>
-      <Link to="/admin" className="admin-chip">
-        Admin
-      </Link>
 
       {searchingNow ? (
         <main className="archive">

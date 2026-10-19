@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type PointerEvent } from "react";
+import { useEffect, useState, type PointerEvent } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { track } from "@/lib/track";
 import { pageHead } from "@/lib/seo";
@@ -21,7 +21,6 @@ const DISCIPLINES = [
 ] as const;
 
 function Home() {
-  const desktop = useRef<HTMLVideoElement>(null);
   const [pressed, setPressed] = useState<string | null>(null);
   const [hover, setHover] = useState<string | null>(null);
   const active = DISCIPLINES.find((item) => item.id === (hover ?? pressed));
@@ -30,38 +29,8 @@ function Home() {
     track("landing");
   }, []);
 
-  useEffect(() => {
-    const wide = desktop.current;
-    if (!wide) return;
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const connection = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
-    if (reduce.matches || connection?.saveData) {
-      wide.removeAttribute("src");
-      wide.load();
-      return;
-    }
-    const start = () => {
-      wide.play().catch(() => {});
-    };
-    if (wide.readyState >= 2) start();
-    else wide.addEventListener("canplay", start, { once: true });
-    return () => wide.removeEventListener("canplay", start);
-  }, []);
-
   return (
     <main className="stage">
-      <video
-        ref={desktop}
-        className="bg-video"
-        src="/media/park.mp4"
-        poster="/media/park-poster.webp"
-        muted
-        loop
-        playsInline
-        autoPlay
-        preload="auto"
-        aria-hidden="true"
-      />
       <div className="stack" data-ready="true">
         <div className="floor">
           <div className="archive-head">

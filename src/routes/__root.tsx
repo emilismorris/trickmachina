@@ -3,7 +3,7 @@ import { createRootRoute, HeadContent, Link, Outlet, Scripts, useRouterState } f
 import { AuthProvider } from "@/lib/auth/provider";
 import { PreviewHostBridge } from "@/components/preview-host-bridge";
 import { ConsentBanner } from "@/components/consent";
-import { GA_ID, trackPage } from "@/lib/ga";
+import { startAnalytics, trackPage } from "@/lib/ga";
 import { collectVisit } from "@/lib/visit";
 import appCss from "../styles.css?url";
 
@@ -26,15 +26,6 @@ export const Route = createRootRoute({
   component: () => (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <script async src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`} />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `window.dataLayer = window.dataLayer || [];
-function gtag(){dataLayer.push(arguments);}
-gtag('js', new Date());
-gtag('config', 'G-83KS7WNY4P');`,
-          }}
-        />
         <HeadContent />
       </head>
       <body>
@@ -56,6 +47,7 @@ function Analytics() {
   const first = useRef(true);
   useEffect(() => {
     collectVisit(href);
+    startAnalytics();
     if (first.current) {
       first.current = false;
       return;
