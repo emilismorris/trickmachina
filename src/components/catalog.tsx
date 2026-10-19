@@ -536,6 +536,10 @@ export function CatalogScreen({ catalog, onNeedMore }: { catalog: Catalog; onNee
           {menu ? <X aria-hidden="true" /> : <Menu aria-hidden="true" />}
         </button>
         <nav className={menu ? "nav-links is-open" : "nav-links"} aria-label="Browse">
+          <Link to="/" className="nav-link nav-back" aria-label="Back to the archive" onClick={() => setMenu(false)}>
+            <ChevronLeft aria-hidden="true" />
+            Back
+          </Link>
           {catalog.nav.map((item) => (
             <button key={item.id} type="button" className="nav-link" aria-pressed={view === item.id && !searchingNow} onClick={() => go(item.id)}>
               {item.label}
