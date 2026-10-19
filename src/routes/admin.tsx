@@ -130,6 +130,24 @@ function AdminPage() {
       <div className="admin-wrap">
         <p className="kicker">{data?.email ?? user.primaryEmail}</p>
         <h1>Desk</h1>
+        <section className="admin-block">
+          <h2>Notes</h2>
+          {(data?.notes ?? []).length === 0 ? (
+            <p className="admin-note">None yet.</p>
+          ) : (
+            <ul className="note-list">
+              {data?.notes.map((note) => (
+                <li key={note.id}>
+                  <p>
+                    <strong>{note.name}</strong>
+                    <a href={`mailto:${note.email}`}>{note.email}</a>
+                  </p>
+                  <p>{note.message}</p>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
         <p className="admin-note">
           {rangeLabel}. {stats.users.toLocaleString("en-US")} active users, {stats.views.toLocaleString("en-US")} visits.
         </p>

@@ -168,6 +168,15 @@ export async function loadAdminDashboard(userId: string, range: VisitRange) {
     browsers,
     languages,
   };
+  const notes = await optional(
+    sql<{ id: number; name: string; email: string; message: string; created_at: string }>`
+      select id, name, email, message, created_at::text as created_at
+      from contact_note
+      order by id desc
+      limit 40
+    `,
+    [],
+  );
   return {
     email,
     traffic,
@@ -175,5 +184,6 @@ export async function loadAdminDashboard(userId: string, range: VisitRange) {
     archive: archiveStats,
     range,
     report,
+    notes,
   };
 }

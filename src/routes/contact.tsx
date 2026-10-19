@@ -13,19 +13,21 @@ function Contact() {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [company, setCompany] = useState("");
-  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "failed">("idle");
+  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "saved" | "failed">("idle");
 
   async function submit(event: FormEvent) {
     event.preventDefault();
     setStatus("sending");
     try {
       const result = await sendContact({ data: { name, email, message, company } });
-      setStatus(result.ok ? "sent" : "failed");
-      if (result.ok) {
-        setName("");
-        setEmail("");
-        setMessage("");
+      if (!result.ok) {
+        setStatus("failed");
+        return;
       }
+      setStatus(result.mailed ? "sent" : "saved");
+      setName("");
+      setEmail("");
+      setMessage("");
     } catch {
       setStatus("failed");
     }
@@ -40,6 +42,8 @@ function Contact() {
       <p>Write a note. It goes straight to Trick Machina.</p>
       {status === "sent" ? (
         <p>Sent.</p>
+      ) : status === "saved" ? (
+        <p>Received. It is on the admin desk.</p>
       ) : (
         <form className="contact-form" onSubmit={submit}>
           <label>

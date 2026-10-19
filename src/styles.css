@@ -103,7 +103,10 @@ to{opacity:1;translate:0}
 .contact-form input,.contact-form textarea{color:#fff;font:inherit;background:#000;border:1px solid #fff;padding:.6rem .7rem}
 .contact-form textarea{min-height:8rem;resize:vertical}
 .contact-form button{align-self:flex-start;min-height:2.6rem;color:#000;font:inherit;background:#fff;border:0;padding:0 .9rem}
-.contact-honey{position:absolute;left:-9999px}
+.note-list{margin:0;padding:0;list-style:none}
+.note-list li{border-top:1px solid var(--color-line);padding:.8rem 0}
+.note-list p{margin:.2rem 0}
+.note-list a{color:var(--color-muted);margin-left:.6rem}
 .soon-deck{width:min(100%,16rem);padding:0 .75rem;position:absolute;top:50%;left:50%;translate:-50% -50%}
 .soon-back{color:var(--color-fg);letter-spacing:.12em;text-transform:uppercase;text-shadow:0 1px 2px #000000e6;font-size:.75rem;text-decoration:none;position:absolute;bottom:1.4rem;left:50%;translate:-50%}
 .soon-back:hover,.soon-back:focus-visible{color:var(--color-ink);background:var(--color-fg);text-shadow:none}
