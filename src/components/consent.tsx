@@ -4,6 +4,20 @@ import { cookiebotAllowed } from "@/lib/cookiebot-host";
 
 const KEY = "tm-consent";
 
+function readChoice(): "yes" | "no" | null {
+  const match = document.cookie.match(/(?:^|; )tm-consent=(yes|no)(?:;|$)/);
+  return match?.[1] === "yes" || match?.[1] === "no" ? match[1] : null;
+}
+
+function writeChoice(value: "yes" | "no") {
+  document.cookie = `${KEY}=${value}; Max-Age=15552000; Path=/; SameSite=Lax`;
+  try {
+    localStorage.removeItem(KEY);
+  } catch {
+    /* a hard reset should follow the cookie, not an old saved choice */
+  }
+}
+
 function dropUnauthorizedCookiebot() {
   if (cookiebotAllowed(window.location.hostname)) return;
   document.getElementById("Cookiebot")?.remove();
@@ -37,24 +51,14 @@ export function ConsentBanner() {
     patchCookiebot();
     const observer = new MutationObserver(patchCookiebot);
     observer.observe(document.body, { childList: true, subtree: true });
-    if (!localStorage.getItem(KEY)) {
-      const timer = window.setTimeout(() => {
-        const dialog = document.getElementById("CybotCookiebotDialog");
-        const shown = Boolean(dialog && dialog.getAttribute("aria-hidden") !== "true" && dialog.offsetParent !== null);
-        if (!shown) setOpen(true);
-      }, 800);
-      return () => {
-        window.clearTimeout(timer);
-        observer.disconnect();
-      };
-    }
+    if (!readChoice()) setOpen(true);
     return () => observer.disconnect();
   }, []);
 
   if (!open) return null;
 
   const choose = (value: "yes" | "no") => {
-    localStorage.setItem(KEY, value);
+    writeChoice(value);
     setOpen(false);
   };
 
