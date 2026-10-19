@@ -19,6 +19,21 @@ const databaseUrl =
 export const dbSource: DbSource = databaseUrl ? "neon" : "pglite";
 
 /**
+ * Neon connection strings often set `channel_binding=require`. node-postgres
+ * on the deployed runtime treats that as a failed connection, and Better Auth
+ * turns the failure into an empty 500. The pooler works without it.
+ */
+export function neonConnectionString(raw: string): string {
+  try {
+    const url = new URL(raw);
+    url.searchParams.delete("channel_binding");
+    return url.toString();
+  } catch {
+    return raw.replace(/([?&])channel_binding=[^&]*/g, "").replace(/\?&/, "?").replace(/[?&]$/, "");
+  }
+}
+
+/**
  * Minimal shared SQL surface, satisfied by both Neon and PGLite. Both the
  * tagged-template and `.query()` forms resolve to an array of row objects:
  *
@@ -93,7 +108,8 @@ function createNeonSql(): Promise<Sql> {
     types.setTypeParser(OID_INT8, Number);
     types.setTypeParser(OID_DATE, identity);
     types.setTypeParser(OID_INTERVAL, identity);
-    const pool = new Pool({ connectionString: databaseUrl });
+    const pool = new Pool({ connectionString: neonConnectionString(databaseUrl as string) });
+    pool.on("error", () => {});
     return toSql(async <T>(text: string, params: unknown[]) => {
       const res = await pool.query(text, params);
       return res.rows as T[];
