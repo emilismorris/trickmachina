@@ -14,7 +14,7 @@ const PAGES: Record<string, { title: string; description: string }> = {
   },
   bmx: {
     title: "BMX Videos 1985–2026 — Trick Machina",
-    description: "20,898 BMX videos, 1985–2026, sorted by era, team and scene. Free to watch.",
+    description: "20,906 BMX videos, 1985–2026, sorted by era, team and scene. Free to watch.",
   },
   blades: {
     title: "Blades Videos 1923–2026 — Trick Machina",
