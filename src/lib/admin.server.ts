@@ -184,16 +184,25 @@ async function ensurePresence(sql: Awaited<ReturnType<typeof getSql>>) {
   await sql`create table if not exists analytics_presence (
     visitor text primary key,
     path text not null,
-    seen_at timestamptz not null default now()
+    seen_at timestamptz not null default now(),
+    place text
   )`;
+  await sql`alter table analytics_presence add column if not exists place text`;
 }
 
 export async function touchPresence(visitorId: string, path: string) {
   const sql = await getSql();
   await ensurePresence(sql);
   const visitor = digest(visitorId);
-  await sql`insert into analytics_presence (visitor, path, seen_at) values (${visitor}, ${path}, now())
-    on conflict (visitor) do update set path = excluded.path, seen_at = now()`;
+  const current = await sql<{ place: string | null }>`select place from analytics_presence where visitor = ${visitor}`;
+  let place = current[0]?.place ?? null;
+  if (!place) {
+    const ip = clientIp();
+    const geo = ip ? await locateIp(ip) : null;
+    place = geo?.place ?? null;
+  }
+  await sql`insert into analytics_presence (visitor, path, seen_at, place) values (${visitor}, ${path}, now(), ${place})
+    on conflict (visitor) do update set path = excluded.path, seen_at = now(), place = coalesce(analytics_presence.place, excluded.place)`;
 }
 
 export async function loadOnline(userId: string) {
@@ -203,7 +212,7 @@ export async function loadOnline(userId: string) {
   if (!isAdminEmail(email)) throw new Error("Forbidden");
   await ensurePresence(sql);
   await sql`delete from analytics_presence where seen_at < now() - interval '1 day'`;
-  const [countRow, pages] = await Promise.all([
+  const [countRow, pages, places] = await Promise.all([
     sql<{ n: number }>`select count(*)::int as n from analytics_presence where seen_at > now() - interval '2 minutes'`,
     sql<MetricRow>`
       select path as label, count(*)::int as hits
@@ -213,8 +222,16 @@ export async function loadOnline(userId: string) {
       order by hits desc, path
       limit 12
     `,
+    sql<MetricRow>`
+      select coalesce(place, 'Unknown') as label, count(*)::int as hits
+      from analytics_presence
+      where seen_at > now() - interval '2 minutes'
+      group by place
+      order by hits desc, label
+      limit 12
+    `,
   ]);
-  return { count: countRow[0]?.n ?? 0, pages };
+  return { count: countRow[0]?.n ?? 0, pages, places };
 }
 
 async function loadNotes(sql: Awaited<ReturnType<typeof getSql>>) {

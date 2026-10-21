@@ -249,11 +249,11 @@ function AdminPage() {
           <p>Active online now</p>
           <strong>{online ? online.count.toLocaleString("en-US") : "—"}</strong>
           <span>People on the site in the last 2 minutes.</span>
-          {online && online.pages.length > 0 ? (
+          {online && online.places.length > 0 ? (
             <ul>
-              {online.pages.map((row) => (
+              {online.places.map((row) => (
                 <li key={row.label}>
-                  <span>{pageMeta(row.label).screen}</span>
+                  <span>{row.label}</span>
                   <strong>{row.hits.toLocaleString("en-US")}</strong>
                 </li>
               ))}
