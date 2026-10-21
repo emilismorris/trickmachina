@@ -4,7 +4,7 @@ import { AuthProvider } from "@/lib/auth/provider";
 import { PreviewHostBridge } from "@/components/preview-host-bridge";
 import { ConsentBanner } from "@/components/consent";
 import { startAnalytics, trackPage } from "@/lib/ga";
-import { collectVisit } from "@/lib/visit";
+import { collectVisit, pulsePresence } from "@/lib/visit";
 import appCss from "../styles.css?url";
 
 export const Route = createRootRoute({
@@ -48,11 +48,21 @@ function Analytics() {
   useEffect(() => {
     collectVisit(href);
     startAnalytics();
+    const beat = window.setInterval(() => pulsePresence(href), 45_000);
+    const onShow = () => pulsePresence(href);
+    document.addEventListener("visibilitychange", onShow);
     if (first.current) {
       first.current = false;
-      return;
+      return () => {
+        window.clearInterval(beat);
+        document.removeEventListener("visibilitychange", onShow);
+      };
     }
     trackPage(href);
+    return () => {
+      window.clearInterval(beat);
+      document.removeEventListener("visibilitychange", onShow);
+    };
   }, [href]);
   return null;
 }

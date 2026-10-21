@@ -70,6 +70,45 @@ export const recordVisit = createServerFn({ method: "POST" })
     return { ok: true as const };
   });
 
+function presencePath(value: string) {
+  const clean = value.split("?")[0]?.split("#")[0]?.trim() ?? "";
+  const normalized = clean.replace(/\/+$/, "") || "/";
+  if (
+    normalized.length > 120 ||
+    !normalized.startsWith("/") ||
+    normalized.startsWith("//") ||
+    normalized.includes("..") ||
+    !/^\/[a-z0-9/_$.-]*$/i.test(normalized) ||
+    normalized.startsWith("/login") ||
+    normalized.startsWith("/api")
+  ) {
+    return null;
+  }
+  return normalized;
+}
+
+export const recordPresence = createServerFn({ method: "POST" })
+  .validator((input: unknown): { path: string; visitor: string } => {
+    if (!input || typeof input !== "object") throw new Error("Unknown presence");
+    const body = input as { path?: unknown; visitor?: unknown };
+    const path = presencePath(typeof body.path === "string" ? body.path : "");
+    const visitor = label(body.visitor, 64);
+    if (!path || !visitor) throw new Error("Unknown presence");
+    return { path, visitor };
+  })
+  .handler(async ({ data }) => {
+    const { touchPresence } = await import("./admin.server");
+    await touchPresence(data.visitor, data.path);
+    return { ok: true as const };
+  });
+
+export const getOnlineNow = createServerFn({ method: "GET" })
+  .middleware([authMiddleware])
+  .handler(async ({ context }) => {
+    const { loadOnline } = await import("./admin.server");
+    return loadOnline(context.userId);
+  });
+
 export const getAdminDashboard = createServerFn({ method: "GET" })
   .middleware([authMiddleware])
   .validator((range: unknown): VisitRange => (range === "7" || range === "all" ? range : "28"))

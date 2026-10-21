@@ -180,6 +180,43 @@ export async function loadAdminDashboard(userId: string, range: VisitRange) {
   };
 }
 
+async function ensurePresence(sql: Awaited<ReturnType<typeof getSql>>) {
+  await sql`create table if not exists analytics_presence (
+    visitor text primary key,
+    path text not null,
+    seen_at timestamptz not null default now()
+  )`;
+}
+
+export async function touchPresence(visitorId: string, path: string) {
+  const sql = await getSql();
+  await ensurePresence(sql);
+  const visitor = digest(visitorId);
+  await sql`insert into analytics_presence (visitor, path, seen_at) values (${visitor}, ${path}, now())
+    on conflict (visitor) do update set path = excluded.path, seen_at = now()`;
+}
+
+export async function loadOnline(userId: string) {
+  const sql = await getSql();
+  const users = await sql<{ email: string }>`select email from "user" where id = ${userId}`;
+  const email = users[0]?.email ?? "";
+  if (!isAdminEmail(email)) throw new Error("Forbidden");
+  await ensurePresence(sql);
+  await sql`delete from analytics_presence where seen_at < now() - interval '1 day'`;
+  const [countRow, pages] = await Promise.all([
+    sql<{ n: number }>`select count(*)::int as n from analytics_presence where seen_at > now() - interval '2 minutes'`,
+    sql<MetricRow>`
+      select path as label, count(*)::int as hits
+      from analytics_presence
+      where seen_at > now() - interval '2 minutes'
+      group by path
+      order by hits desc, path
+      limit 12
+    `,
+  ]);
+  return { count: countRow[0]?.n ?? 0, pages };
+}
+
 async function loadNotes(sql: Awaited<ReturnType<typeof getSql>>) {
   await sql`alter table contact_note add column if not exists archived boolean not null default false`;
   const rows = await sql<{ id: number; name: string; email: string; message: string; created_at: string; archived: boolean }>`

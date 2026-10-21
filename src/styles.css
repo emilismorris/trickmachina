@@ -267,6 +267,13 @@ to{opacity:1;translate:0}
 .admin-bar{z-index:5;background:#0c0b0af2;border-bottom:1px solid var(--color-line);align-items:center;gap:.75rem;min-height:4.25rem;padding:.55rem 1.1rem;display:flex;position:sticky;top:0}
 .admin-bar button{min-height:2.75rem;padding:0 .35rem}
 .admin-wrap{width:min(72rem,100%);margin:0 auto;padding:1.6rem 1.4rem 4rem}
+.online-now{background:var(--color-bg-raise);border:1px solid var(--color-line);margin-top:1.2rem;padding:1rem 1rem .85rem}
+.online-now p{color:var(--color-muted);letter-spacing:.12em;text-transform:uppercase;margin:0;font-size:.68rem}
+.online-now>strong{letter-spacing:-.03em;font-variant-numeric:tabular-nums;font-size:clamp(2.4rem,6vw,3.4rem);font-weight:300;display:block;line-height:1}
+.online-now>span{color:var(--color-muted);font-size:.85rem}
+.online-now ul{margin:.8rem 0 0;padding:0;list-style:none}
+.online-now li{justify-content:space-between;gap:1rem;border-top:1px solid var(--color-line);padding:.4rem 0;display:flex}
+.online-now li strong{font-variant-numeric:tabular-nums;font-weight:500}
 .stat-grid{grid-template-columns:1fr 1fr;gap:.6rem;margin-top:1.5rem;display:grid}
 .stat{background:var(--color-bg-raise);border:1px solid var(--color-line);padding:.9rem .95rem 1rem}
 .stat p{color:var(--color-muted);letter-spacing:.12em;text-transform:uppercase;margin:0;font-size:.68rem}

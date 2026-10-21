@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { AdminGoogleButton } from "@/components/admin-google";
 import { TrafficMap } from "@/components/traffic-map";
 import { isAdminEmail } from "@/lib/admin-email";
-import { getAdminDashboard, archiveNotes, type VisitRange } from "@/lib/admin.functions";
+import { getAdminDashboard, archiveNotes, getOnlineNow, type VisitRange } from "@/lib/admin.functions";
 import { signOut } from "@/lib/auth/client";
 import { hasGateSessionMarker } from "@/lib/auth/gate-session-marker";
 import { RedirectToSignIn, UserButton } from "@/lib/auth/gates";
@@ -31,6 +31,9 @@ const PAGES: Record<string, { title: string; screen: string }> = {
   "/blades": { title: "Blades — Trick Machina", screen: "Blades" },
   "/scoot": { title: "Scoot — Trick Machina", screen: "Scoot" },
   "/cookies": { title: "Cookies — Trick Machina", screen: "Cookies" },
+  "/about": { title: "About — Trick Machina", screen: "About" },
+  "/contact": { title: "Contact — Trick Machina", screen: "Contact" },
+  "/admin": { title: "Admin — Trick Machina", screen: "Desk" },
 };
 
 function pageMeta(path: string) {
@@ -140,6 +143,7 @@ function AdminPage() {
   const { user, isPending } = useCurrentUserState();
   const admin = Boolean(user && isAdminEmail(user.primaryEmail));
   const [data, setData] = useState<Dashboard | null>(null);
+  const [online, setOnline] = useState<Awaited<ReturnType<typeof getOnlineNow>> | null>(null);
   const [failed, setFailed] = useState(false);
   const [range, setRange] = useState<VisitRange>("7");
 
@@ -164,6 +168,24 @@ function AdminPage() {
       cancel = true;
     };
   }, [admin, range, user?.id]);
+
+  useEffect(() => {
+    if (!admin || !user) return;
+    let cancel = false;
+    const load = () => {
+      getOnlineNow()
+        .then((next) => {
+          if (!cancel) setOnline(next);
+        })
+        .catch(() => {});
+    };
+    load();
+    const beat = window.setInterval(load, 20_000);
+    return () => {
+      cancel = true;
+      window.clearInterval(beat);
+    };
+  }, [admin, user?.id]);
 
   if (isPending) {
     return (
@@ -223,6 +245,21 @@ function AdminPage() {
       <div className="admin-wrap">
         <p className="kicker">{data?.email ?? user.primaryEmail}</p>
         <h1>Desk</h1>
+        <section className="online-now" aria-live="polite">
+          <p>Active online now</p>
+          <strong>{online ? online.count.toLocaleString("en-US") : "—"}</strong>
+          <span>People on the site in the last 2 minutes.</span>
+          {online && online.pages.length > 0 ? (
+            <ul>
+              {online.pages.map((row) => (
+                <li key={row.label}>
+                  <span>{pageMeta(row.label).screen}</span>
+                  <strong>{row.hits.toLocaleString("en-US")}</strong>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+        </section>
         <NotesCard
           openNotes={data?.notes.open ?? []}
           hiddenNotes={data?.notes.hidden ?? []}

@@ -1,4 +1,4 @@
-import { recordVisit } from "@/lib/admin.functions";
+import { recordPresence, recordVisit } from "@/lib/admin.functions";
 
 const VISITOR = "tm-visitor";
 const SESSION = "tm-session";
@@ -44,18 +44,30 @@ function source() {
   return host;
 }
 
-export function collectVisit(path: string) {
+function beacon(path: string) {
   const clean = path.split("?")[0]?.split("#")[0] ?? "/";
-  if (clean.startsWith("/admin") || clean.startsWith("/login")) return;
-  void recordVisit({
-    data: {
-      path: clean,
-      source: source(),
-      device: device(),
-      browser: browser(),
-      language: (navigator.language || "unknown").slice(0, 16),
-      visitor: stored(localStorage, VISITOR),
-      session: stored(sessionStorage, SESSION),
-    },
-  }).catch(() => {});
+  return {
+    path: clean,
+    source: source(),
+    device: device(),
+    browser: browser(),
+    language: (navigator.language || "unknown").slice(0, 16),
+    visitor: stored(localStorage, VISITOR),
+    session: stored(sessionStorage, SESSION),
+  };
+}
+
+export function collectVisit(path: string) {
+  const data = beacon(path);
+  if (data.path.startsWith("/login")) return;
+  void recordPresence({ data: { path: data.path, visitor: data.visitor } }).catch(() => {});
+  if (data.path.startsWith("/admin")) return;
+  void recordVisit({ data }).catch(() => {});
+}
+
+export function pulsePresence(path: string) {
+  const data = beacon(path);
+  if (data.path.startsWith("/login")) return;
+  if (document.visibilityState === "hidden") return;
+  void recordPresence({ data: { path: data.path, visitor: data.visitor } }).catch(() => {});
 }
