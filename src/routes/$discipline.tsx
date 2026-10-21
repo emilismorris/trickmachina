@@ -18,7 +18,7 @@ const PAGES: Record<string, { title: string; description: string }> = {
   },
   blades: {
     title: "Blades Videos 1923–2026 — Trick Machina",
-    description: "635 blades videos, 1923–2026, sorted by era and scene. Free to watch.",
+    description: "636 blades videos, 1923–2026, sorted by era and scene. Free to watch.",
   },
   scoot: {
     title: "Scoot Videos 2013–2026 — Trick Machina",
