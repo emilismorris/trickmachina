@@ -6,7 +6,7 @@ export const Route = createFileRoute("/about")({
   head: () =>
     pageHead(
       "About — Trick Machina",
-      "Trick Machina is a free archive of skate, BMX, blades, and scoot videos.",
+      "Trick Machina is a free archive of skate, BMX, blades, and scoot videos, in one place.",
       "/about",
     ),
   component: About,
@@ -28,8 +28,16 @@ function About() {
       </p>
       <h1>About</h1>
       <p>
-        Trick Machina is a free archive of skate, BMX, blades, and scoot videos, from 1984 to today. Films stay
-        grouped the way riders look for them: by era, team, brand, and scene.
+        Trick Machina is a free archive of the four disciplines: skate, BMX, blades, and scoot.
+      </p>
+      <p>
+        The films are already out there, under different names and years. Trick Machina puts them on one shelf, so
+        you can browse and watch instead of searching. Skate runs from 1984, BMX from 1985, blades from the earliest
+        reels, and scoot from 2013, up to today.
+      </p>
+      <p>
+        Each discipline is its own room. Rows follow the way riders look: classics, teams, brands, magazines,
+        contests, and scenes. Open a title and the film plays. Watching is free. No account.
       </p>
       <p>
         <Link to="/contact">Contact</Link>
