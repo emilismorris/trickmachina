@@ -1,4 +1,5 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { ChevronLeft } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { sendContact } from "@/lib/contact.functions";
 import { pageHead } from "@/lib/seo";
@@ -9,6 +10,7 @@ export const Route = createFileRoute("/contact")({
 });
 
 function Contact() {
+  const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
@@ -36,7 +38,14 @@ function Contact() {
   return (
     <main className="cookies">
       <p>
-        <Link to="/">The Archive</Link>
+        <button
+          type="button"
+          className="page-back"
+          onClick={() => (window.history.length > 1 ? router.history.back() : router.navigate({ to: "/" }))}
+        >
+          <ChevronLeft aria-hidden="true" />
+          Back
+        </button>
       </p>
       <h1>Contact</h1>
       <p>Write a note. It goes straight to Trick Machina.</p>
