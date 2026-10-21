@@ -10,7 +10,7 @@ import { pageHead } from "@/lib/seo";
 const PAGES: Record<string, { title: string; description: string }> = {
   skate: {
     title: "Skate Videos 1984–2026 — Trick Machina",
-    description: "2,090 skate videos, 1984–2026, sorted by era, team, brand and scene. Free to watch.",
+    description: "2,091 skate videos, 1984–2026, sorted by era, team, brand and scene. Free to watch.",
   },
   bmx: {
     title: "BMX Videos 1985–2026 — Trick Machina",
