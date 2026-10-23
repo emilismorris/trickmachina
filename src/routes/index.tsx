@@ -7,7 +7,7 @@ export const Route = createFileRoute("/")({
   head: () =>
     pageHead(
       "Trick Machina",
-      "Skate, BMX, blades, and scoot videos, free to watch.",
+      "Free archive of skate, BMX, blades and scoot full lengths. No dead links.",
       "/",
     ),
   component: Home,
@@ -18,6 +18,13 @@ const DISCIPLINES = [
   { id: "bmx", label: "BMX", soon: false, gear: "BMX bike" },
   { id: "blades", label: "Blades", soon: false, gear: "Aggressive inline skates" },
   { id: "scoot", label: "Scoot", soon: false, gear: "Street scooter" },
+] as const;
+
+const COUNTS = [
+  { id: "skate", label: "Skate", count: 2091 },
+  { id: "bmx", label: "BMX", count: 20906 },
+  { id: "blades", label: "Blades", count: 636 },
+  { id: "scoot", label: "Scoot", count: 1773 },
 ] as const;
 
 function Home() {
@@ -35,7 +42,17 @@ function Home() {
         <div className="floor">
           <div className="archive-head">
             <h1 className="archive-title">The Archive</h1>
-            <p className="archive-line">The four disciplines. Free videos and films.</p>
+            <p className="archive-line">
+              Free archive of skate, BMX, blades & scoot full lengths. No dead links.
+            </p>
+            <p className="archive-counts" aria-label="Videos by discipline">
+              {COUNTS.map((item, i) => (
+                <span key={item.id}>
+                  {i > 0 ? " · " : null}
+                  {item.label} {item.count.toLocaleString("en-US")}
+                </span>
+              ))}
+            </p>
           </div>
           <section className="deck" aria-label="Choose a discipline">
           {DISCIPLINES.map((item) => {
