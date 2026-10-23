@@ -28,7 +28,7 @@ function About() {
       </p>
       <h1>About</h1>
       <p>
-        Trick Machina is a free archive of the four disciplines: skate, BMX, blades, and scoot.
+        Trick Machina is a free archive of skate, BMX, blades, and scoot full lengths. No dead links.
       </p>
       <p>
         The films are already out there, under different names and years. Trick Machina puts them on one shelf, so
