@@ -3,6 +3,7 @@ import { createRootRoute, HeadContent, Link, Outlet, Scripts, useRouterState } f
 import { AuthProvider } from "@/lib/auth/provider";
 import { PreviewHostBridge } from "@/components/preview-host-bridge";
 import { ConsentBanner } from "@/components/consent";
+import { HeyCatchAnalytics } from "@/components/heycatch-analytics";
 import { startAnalytics, trackPage } from "@/lib/ga";
 import { collectVisit, pulsePresence } from "@/lib/visit";
 import appCss from "../styles.css?url";
@@ -31,6 +32,7 @@ export const Route = createRootRoute({
       <body>
         <NoPullRefresh />
         <Analytics />
+        <HeyCatchAnalytics />
         <PreviewHostBridge />
         <ConsentBanner />
         <AuthProvider>
