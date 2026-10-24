@@ -1,36 +1,73 @@
 {
   "installCommand": "npm install --omit=dev --no-audit --no-fund",
-  "regions": ["fra1"],
+  "regions": [
+    "fra1"
+  ],
   "redirects": [
     {
       "source": "/:path*",
-      "has": [{ "type": "host", "value": "www.trickmachina.com" }],
+      "has": [
+        {
+          "type": "host",
+          "value": "www.trickmachina.com"
+        }
+      ],
       "destination": "https://trickmachina.com/:path*",
       "permanent": true
     },
     {
       "source": "/:path*",
-      "has": [{ "type": "host", "value": "alphatrickmachina.grok.me" }],
+      "has": [
+        {
+          "type": "host",
+          "value": "alphatrickmachina.grok.me"
+        }
+      ],
       "destination": "https://trickmachina.com/:path*",
       "permanent": true
+    },
+    {
+      "source": "/:l([a-z0-9])",
+      "destination": "/?utm_source=heycatch&utm_campaign=:l",
+      "permanent": false
     }
   ],
   "headers": [
     {
       "source": "/admin",
-      "headers": [{ "key": "X-Robots-Tag", "value": "noindex" }]
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex"
+        }
+      ]
     },
     {
       "source": "/login",
-      "headers": [{ "key": "X-Robots-Tag", "value": "noindex" }]
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex"
+        }
+      ]
     },
     {
       "source": "/sitemap.xml",
-      "headers": [{ "key": "Content-Type", "value": "application/xml; charset=utf-8" }]
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/xml; charset=utf-8"
+        }
+      ]
     },
     {
       "source": "/robots.txt",
-      "headers": [{ "key": "Content-Type", "value": "text/plain; charset=utf-8" }]
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "text/plain; charset=utf-8"
+        }
+      ]
     },
     {
       "source": "/catalogs/(.*)",
