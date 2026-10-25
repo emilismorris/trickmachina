@@ -100,6 +100,11 @@ to{opacity:1;translate:0}
 .cookies h1{letter-spacing:.14em;text-transform:uppercase;font-size:1.35rem;font-weight:300}
 .cookies>p a{color:#fff}
 .cookies-clear{min-height:2.4rem;color:#000;font:inherit;background:#fff;border:0;padding:0 .8rem}
+.account-list{margin:1.1rem 0 0;padding:0;list-style:none}
+.account-list li{border-top:1px solid #2e2a26;padding:.7rem 0;display:flex;flex-direction:column;gap:.15rem}
+.account-list span{letter-spacing:.12em;text-transform:uppercase;color:#c5bbaa;font-size:.68rem}
+.account-list em{color:#c5bbaa;font-style:normal;font-size:.85rem}
+.cookies .btn-google{margin-top:1rem}
 .settings-choice{display:flex;gap:.5rem}
 .settings-choice button{min-height:2.4rem;color:#fff;font:inherit;background:transparent;border:1px solid #fff;padding:0 .8rem}
 .settings-choice button.is-on{color:#000;background:#fff}

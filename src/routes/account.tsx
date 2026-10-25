@@ -1,0 +1,120 @@
+import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { ChevronLeft } from "lucide-react";
+import { useEffect, useState } from "react";
+import { signIn, signOut } from "@/lib/auth/client";
+import { useCurrentUserState } from "@/lib/auth/use-current-user";
+import { listFavorites, toggleFavorite, type SavedFilm } from "@/lib/list.functions";
+import { pageHead } from "@/lib/seo";
+
+export const Route = createFileRoute("/account")({
+  head: () => pageHead("Log in — Trick Machina", "Sign in with Google and keep a list of films.", "/account"),
+  component: Account,
+});
+
+const PENDING = "tm-pending-favorite";
+const NAMES: Record<string, string> = { skate: "Skate", bmx: "BMX", blades: "Blades", scoot: "Scoot" };
+
+function Account() {
+  const router = useRouter();
+  const { user, isPending } = useCurrentUserState();
+  const signedIn = Boolean(user && !user.isDevFallback);
+  const [films, setFilms] = useState<SavedFilm[]>([]);
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    if (isPending || !signedIn) return;
+    let stop = false;
+    (async () => {
+      try {
+        const raw = sessionStorage.getItem(PENDING);
+        if (raw) {
+          const pending = JSON.parse(raw) as SavedFilm;
+          sessionStorage.removeItem(PENDING);
+          if (pending?.filmId && pending.title && pending.discipline) {
+            await toggleFavorite({ data: { ...pending, on: true } });
+          }
+        }
+        const rows = await listFavorites();
+        if (!stop) setFilms(rows);
+      } catch {
+        if (!stop) setError("The list didn’t load.");
+      }
+    })();
+    return () => {
+      stop = true;
+    };
+  }, [isPending, signedIn]);
+
+  return (
+    <main className="cookies">
+      <p>
+        <button
+          type="button"
+          className="page-back"
+          onClick={() => (window.history.length > 1 ? router.history.back() : router.navigate({ to: "/" }))}
+        >
+          <ChevronLeft aria-hidden="true" />
+          Back
+        </button>
+      </p>
+      <h1>{signedIn ? "Your list" : "Log in"}</h1>
+      {isPending ? null : signedIn ? (
+        <>
+          <p>Signed in as {user?.displayName || user?.primaryEmail}. Films you mark My list stay on this account.</p>
+          {films.length ? (
+            <ul className="account-list">
+              {films.map((film) => (
+                <li key={`${film.discipline}:${film.filmId}`}>
+                  <span>{NAMES[film.discipline] ?? film.discipline}</span>
+                  <strong>{film.title}</strong>
+                  <em>{[film.year > 0 ? film.year : null, film.company].filter(Boolean).join(" · ")}</em>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>Nothing saved yet. Open a film and choose My list.</p>
+          )}
+          {error ? <p>{error}</p> : null}
+          <p>
+            <button type="button" className="cookies-clear" disabled={busy} onClick={() => { setBusy(true); void signOut("/account").catch(() => setBusy(false)); }}>
+              Log out
+            </button>
+          </p>
+        </>
+      ) : (
+        <>
+          <p>Sign in with Google. An account is created for you, and your list of films is kept on it.</p>
+          <button
+            type="button"
+            className="btn-google"
+            disabled={busy}
+            onClick={() => {
+              setBusy(true);
+              setError("");
+              void signIn("grok-google", { callbackURL: "/account", errorCallbackURL: "/account" }).catch((reason: unknown) => {
+                setBusy(false);
+                setError(reason instanceof Error ? reason.message : "Google sign-in didn’t finish.");
+              });
+            }}
+          >
+            <GoogleMark />
+            {busy ? "Opening Google…" : "Sign in with Google"}
+          </button>
+          {error ? <p>{error}</p> : null}
+        </>
+      )}
+    </main>
+  );
+}
+
+function GoogleMark() {
+  return (
+    <svg viewBox="0 0 48 48" aria-hidden="true">
+      <path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z" />
+      <path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z" />
+      <path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238A11.91 11.91 0 0 1 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z" />
+      <path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303a12.04 12.04 0 0 1-4.087 5.571l.003-.002 6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z" />
+    </svg>
+  );
+}

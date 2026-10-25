@@ -1,9 +1,11 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useRouter } from "@tanstack/react-router";
 import { Check, ChevronLeft, ChevronRight, Menu, Play, Plus, X } from "lucide-react";
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import type { Catalog, CatalogView, Film, RowShelf, Shelf, Watch } from "@/data/types";
-import { track } from "@/lib/track";
+import { useCurrentUserState } from "@/lib/auth/use-current-user";
 import { trackEvent } from "@/lib/ga";
+import { listFavorites, toggleFavorite } from "@/lib/list.functions";
+import { track } from "@/lib/track";
 
 const PAGE = 48;
 
@@ -168,26 +170,86 @@ function brandShelves(films: Film[], baltic: Set<string>): RowShelf[] {
   return shelves;
 }
 
-function useSaved(discipline: string) {
-  const key = `tm-list:${discipline}`;
+const PENDING = "tm-pending-favorite";
+
+function readLocal(key: string) {
+  try {
+    const raw = localStorage.getItem(key);
+    const parsed = raw ? (JSON.parse(raw) as unknown) : [];
+    return Array.isArray(parsed) ? parsed.filter((id) => typeof id === "string") : [];
+  } catch {
+    return [];
+  }
+}
+
+function useSaved(catalog: Catalog) {
+  const router = useRouter();
+  const { user, isPending } = useCurrentUserState();
+  const signedIn = Boolean(user && !user.isDevFallback);
   const [ids, setIds] = useState<string[]>([]);
+
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(key);
-      const parsed = raw ? (JSON.parse(raw) as unknown) : [];
-      if (Array.isArray(parsed)) setIds(parsed.filter((id) => typeof id === "string"));
-    } catch {
-      setIds([]);
+    if (isPending) return;
+    const key = `tm-list:${catalog.id}`;
+    if (!signedIn) {
+      setIds(readLocal(key));
+      return;
     }
-  }, [key]);
+    let stop = false;
+    (async () => {
+      try {
+        const rows = await listFavorites();
+        const mine = new Set(rows.filter((row) => row.discipline === catalog.id).map((row) => row.filmId));
+        for (const id of readLocal(key)) {
+          const film = catalog.films[id];
+          if (!film || mine.has(id)) continue;
+          await toggleFavorite({
+            data: { on: true, discipline: catalog.id, filmId: id, title: film.title, year: film.year, company: film.company, thumb: film.thumb },
+          });
+          mine.add(id);
+        }
+        localStorage.removeItem(key);
+        if (!stop) setIds([...mine]);
+      } catch {
+        if (!stop) setIds(readLocal(key));
+      }
+    })();
+    return () => {
+      stop = true;
+    };
+  }, [signedIn, isPending, catalog.id, catalog.films]);
+
   const toggle = (id: string) => {
-    setIds((current) => {
-      const next = current.includes(id) ? current.filter((item) => item !== id) : [id, ...current].slice(0, 40);
+    const film = catalog.films[id];
+    if (!film) return;
+    if (!signedIn) {
+      const key = `tm-list:${catalog.id}`;
+      if (ids.includes(id)) {
+        const next = ids.filter((item) => item !== id);
+        localStorage.setItem(key, JSON.stringify(next));
+        setIds(next);
+        return;
+      }
+      const next = [id, ...ids].slice(0, 40);
       localStorage.setItem(key, JSON.stringify(next));
-      return next;
+      setIds(next);
+      sessionStorage.setItem(
+        PENDING,
+        JSON.stringify({ discipline: catalog.id, filmId: id, title: film.title, year: film.year, company: film.company, thumb: film.thumb }),
+      );
+      void router.navigate({ to: "/account" });
+      return;
+    }
+    const on = !ids.includes(id);
+    setIds((current) => (on ? [id, ...current.filter((item) => item !== id)].slice(0, 80) : current.filter((item) => item !== id)));
+    void toggleFavorite({
+      data: { on, discipline: catalog.id, filmId: id, title: film.title, year: film.year, company: film.company, thumb: film.thumb },
+    }).catch(() => {
+      setIds((current) => (on ? current.filter((item) => item !== id) : [id, ...current]));
     });
   };
-  return { ids, toggle };
+
+  return { ids, toggle, signedIn };
 }
 
 function Card({ film, shape, onOpen }: { film: Film; shape: Catalog["shape"]; onOpen: (film: Film) => void }) {
@@ -440,7 +502,7 @@ export function CatalogScreen({ catalog, onNeedMore }: { catalog: Catalog; onNee
   const [limit, setLimit] = useState(PAGE);
   const [day, setDay] = useState(dayNumber);
   const searchRef = useRef<HTMLInputElement>(null);
-  const saved = useSaved(catalog.id);
+  const saved = useSaved(catalog);
   const more = useRef<HTMLDivElement>(null);
 
   const heroId = catalog.heroIds.length ? catalog.heroIds[day % catalog.heroIds.length] : catalog.featuredId;
@@ -620,8 +682,8 @@ export function CatalogScreen({ catalog, onNeedMore }: { catalog: Catalog; onNee
           <Link to="/cookies" className="nav-link" onClick={() => setMenu(false)}>
             Cookies
           </Link>
-          <Link to="/settings" className="nav-link" onClick={() => setMenu(false)}>
-            Settings
+          <Link to="/account" className="nav-link" onClick={() => setMenu(false)}>
+            {saved.signedIn ? "Account" : "Log in"}
           </Link>
         </nav>
       </header>
