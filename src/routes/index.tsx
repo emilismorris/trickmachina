@@ -24,22 +24,14 @@ function Home() {
   const [pressed, setPressed] = useState<string | null>(null);
   const [hover, setHover] = useState<string | null>(null);
   const active = DISCIPLINES.find((item) => item.id === (hover ?? pressed));
-  const [motion, setMotion] = useState(true);
 
   useEffect(() => {
     track("landing");
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const save = "connection" in navigator && (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData === true;
-    if (reduce || save) setMotion(false);
   }, []);
 
   return (
     <main className="stage">
-      {motion ? (
-        <video className="bg-video" poster="/media/home-plaza.webp" autoPlay muted loop playsInline preload="auto" aria-hidden="true">
-          <source src="/media/home-plaza.mp4" type="video/mp4" />
-        </video>
-      ) : null}
+      <video className="bg-video" poster="/media/plaza-loop.webp" autoPlay muted loop playsInline preload="auto" aria-hidden="true" src="/media/plaza-loop.mp4" />
       <div className="stack" data-ready="true">
         <div className="floor">
           <div className="archive-head">
