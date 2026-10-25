@@ -1,7 +1,7 @@
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { ChevronLeft } from "lucide-react";
-import { useEffect, useState } from "react";
-import { signIn, signOut } from "@/lib/auth/client";
+import { useEffect, useState, type FormEvent } from "react";
+import { authClient, rememberSessionToken, signIn, signOut } from "@/lib/auth/client";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
 import { listFavorites, toggleFavorite, type SavedFilm } from "@/lib/list.functions";
 import { pageHead } from "@/lib/seo";
@@ -84,7 +84,7 @@ function Account() {
         </>
       ) : (
         <>
-          <p>Sign in with Google. An account is created for you, and your list of films is kept on it.</p>
+          <p>Sign in with Google, or with an email and password. An account is created for you, and your list of films is kept on it.</p>
           <button
             type="button"
             className="btn-google"
@@ -101,10 +101,74 @@ function Account() {
             <GoogleMark />
             {busy ? "Opening Google…" : "Sign in with Google"}
           </button>
+          <EmailSignIn />
           {error ? <p>{error}</p> : null}
         </>
       )}
     </main>
+  );
+}
+
+function EmailSignIn() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  async function submit(event: FormEvent) {
+    event.preventDefault();
+    const address = email.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(address) || password.length < 8) {
+      setError("Use an email and a password of at least 8 characters.");
+      return;
+    }
+    setBusy(true);
+    setError("");
+    const signed = await authClient.signIn.email({ email: address, password, callbackURL: "/account" });
+    if (!signed.error) {
+      if (signed.data?.token) rememberSessionToken(signed.data.token);
+      window.location.assign("/account");
+      return;
+    }
+    const created = await authClient.signUp.email({
+      email: address,
+      password,
+      name: address.split("@")[0] || "Reader",
+      callbackURL: "/account",
+    });
+    if (!created.error) {
+      if (created.data?.token) rememberSessionToken(created.data.token);
+      window.location.assign("/account");
+      return;
+    }
+    setBusy(false);
+    const message = created.error.message ?? "";
+    setError(/exist/i.test(message) ? "That password doesn’t match this email." : message || "Sign-in didn’t finish.");
+  }
+
+  return (
+    <form className="account-form" onSubmit={submit}>
+      <label>
+        Email
+        <input type="email" name="email" autoComplete="email" required value={email} onChange={(event) => setEmail(event.target.value)} />
+      </label>
+      <label>
+        Password
+        <input
+          type="password"
+          name="password"
+          autoComplete="current-password"
+          required
+          minLength={8}
+          value={password}
+          onChange={(event) => setPassword(event.target.value)}
+        />
+      </label>
+      <button className="cookies-clear" type="submit" disabled={busy}>
+        {busy ? "Signing in…" : "Sign in with email"}
+      </button>
+      {error ? <p>{error}</p> : null}
+    </form>
   );
 }
 
