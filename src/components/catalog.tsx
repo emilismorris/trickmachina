@@ -123,8 +123,43 @@ function embedSrc(watch: Watch, part = 0) {
   return null;
 }
 
+function playable(film: Film) {
+  return film.watch.host !== "none";
+}
+
 function canPlay(watch: Watch) {
   return watch.host !== "none" && watch.host !== "link";
+}
+
+function balticFilmIds(catalog: Catalog) {
+  const ids = new Set<string>();
+  const walk = (node: { filmIds?: string[]; previewIds?: string[]; shelves?: { filmIds?: string[]; previewIds?: string[]; shelves?: unknown[] }[] } | undefined) => {
+    if (!node) return;
+    for (const id of node.filmIds ?? []) ids.add(id);
+    for (const id of node.previewIds ?? []) ids.add(id);
+    for (const shelf of node.shelves ?? []) walk(shelf as typeof node);
+  };
+  walk(catalog.views.baltic ?? catalog.views.baltics);
+  return ids;
+}
+
+function brandShelves(films: Film[], baltic: Set<string>): RowShelf[] {
+  const groups = new Map<string, string[]>();
+  for (const film of films) {
+    if (!playable(film)) continue;
+    const brand = baltic.has(film.id) ? "Baltics" : film.company.trim() || "Independent";
+    const list = groups.get(brand);
+    if (list) list.push(film.id);
+    else groups.set(brand, [film.id]);
+  }
+  return [...groups.entries()]
+    .sort((a, b) => (a[0] === "Baltics" ? -1 : b[0] === "Baltics" ? 1 : a[0].localeCompare(b[0])))
+    .map(([title, filmIds]) => ({
+      id: title.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+      title,
+      filmIds,
+      previewIds: filmIds.slice(0, 12),
+    }));
 }
 
 function useSaved(discipline: string) {
@@ -531,6 +566,7 @@ export function CatalogScreen({ catalog, onNeedMore }: { catalog: Catalog; onNee
     const byYear = new Map<number, Film[]>();
     const undated: Film[] = [];
     for (const film of Object.values(catalog.films)) {
+      if (!playable(film)) continue;
       if (film.year >= 1980 && film.year <= 1999) classics.push(film);
       else if (film.year >= 1900) {
         const list = byYear.get(film.year);
@@ -549,6 +585,10 @@ export function CatalogScreen({ catalog, onNeedMore }: { catalog: Catalog; onNee
     });
     return { classics, years, byYear, undated };
   }, [catalog.films]);
+  const baltic = useMemo(() => balticFilmIds(catalog), [catalog]);
+  const openGrouped = (title: string, films: Film[], note?: string) => {
+    showShelf(title, [], undefined, note, brandShelves(films, baltic));
+  };
   const headerName = catalog.id === "skate" ? "Skate" : catalog.name;
 
   return (
@@ -626,6 +666,7 @@ export function CatalogScreen({ catalog, onNeedMore }: { catalog: Catalog; onNee
                       films={shown}
                       shape={catalog.shape}
                       onOpen={openFilm}
+                      onTitle={shelf.filmIds.length > shown.length ? () => drillShelf(shelf.title, shelf.filmIds, focusTop.title) : undefined}
                     />
                   );
                 })}
@@ -712,11 +753,7 @@ export function CatalogScreen({ catalog, onNeedMore }: { catalog: Catalog; onNee
                 films={yearShelves.classics.slice(0, 12)}
                 shape={catalog.shape}
                 onOpen={openFilm}
-                onTitle={
-                  yearShelves.classics.length > 12
-                    ? () => showShelf("Classics", yearShelves.classics.map((film) => film.id), undefined, "1980s and 1990s")
-                    : undefined
-                }
+                onTitle={() => openGrouped("Classics", yearShelves.classics, "1980s and 1990s")}
               />
             ) : null}
             {yearShelves.years.map((year) => {
@@ -729,7 +766,7 @@ export function CatalogScreen({ catalog, onNeedMore }: { catalog: Catalog; onNee
                   films={list.slice(0, 12)}
                   shape={catalog.shape}
                   onOpen={openFilm}
-                  onTitle={list.length > 12 ? () => showShelf(String(year), list.map((film) => film.id)) : undefined}
+                  onTitle={() => openGrouped(String(year), list)}
                 />
               );
             })}
@@ -740,11 +777,7 @@ export function CatalogScreen({ catalog, onNeedMore }: { catalog: Catalog; onNee
                 films={yearShelves.undated.slice(0, 12)}
                 shape={catalog.shape}
                 onOpen={openFilm}
-                onTitle={
-                  yearShelves.undated.length > 12
-                    ? () => showShelf("Undated", yearShelves.undated.map((film) => film.id))
-                    : undefined
-                }
+                onTitle={() => openGrouped("Undated", yearShelves.undated)}
               />
             ) : null}
             {onNeedMore ? <div ref={more} className="row-more" aria-hidden="true" /> : null}
