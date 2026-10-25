@@ -129,7 +129,6 @@ function Account() {
             <XMark />
             {busy ? "Opening…" : "Sign in with X"}
           </button>
-          <EmailSignIn />
           {error ? <p>{error}</p> : null}
         </>
       )}
