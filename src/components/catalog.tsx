@@ -152,14 +152,20 @@ function brandShelves(films: Film[], baltic: Set<string>): RowShelf[] {
     if (list) list.push(film.id);
     else groups.set(brand, [film.id]);
   }
-  return [...groups.entries()]
-    .sort((a, b) => (a[0] === "Baltics" ? -1 : b[0] === "Baltics" ? 1 : a[0].localeCompare(b[0])))
+  const shelves = [...groups.entries()]
+    .sort((a, b) => a[0].localeCompare(b[0]))
     .map(([title, filmIds]) => ({
       id: title.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
       title,
       filmIds,
       previewIds: filmIds.slice(0, 12),
     }));
+  const balticIndex = shelves.findIndex((shelf) => shelf.title === "Baltics");
+  if (balticIndex !== -1) {
+    const [baltic] = shelves.splice(balticIndex, 1);
+    shelves.splice(Math.min(5, shelves.length), 0, baltic);
+  }
+  return shelves;
 }
 
 function useSaved(discipline: string) {
