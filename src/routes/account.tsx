@@ -3,11 +3,12 @@ import { ChevronLeft } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 import { authClient, rememberSessionToken, signIn, signOut } from "@/lib/auth/client";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
-import { listFavorites, toggleFavorite, type SavedFilm } from "@/lib/list.functions";
+import { currentAccount, listFavorites, toggleFavorite, type SavedFilm } from "@/lib/list.functions";
 import { pageHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/account")({
-  head: () => pageHead("Log in — Trick Machina", "Sign in with Google and keep a list of films.", "/account"),
+  head: () => pageHead("Log in — Trick Machina", "Sign in and keep a list of films.", "/account"),
+  loader: () => currentAccount(),
   component: Account,
 });
 
@@ -16,8 +17,11 @@ const NAMES: Record<string, string> = { skate: "Skate", bmx: "BMX", blades: "Bla
 
 function Account() {
   const router = useRouter();
+  const { email: serverEmail } = Route.useLoaderData();
   const { user, isPending } = useCurrentUserState();
-  const signedIn = Boolean(user && !user.isDevFallback);
+  const clientUser = Boolean(user && !user.isDevFallback);
+  const signedIn = Boolean(serverEmail || clientUser);
+  const email = user?.primaryEmail || serverEmail;
   const [films, setFilms] = useState<SavedFilm[]>([]);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -30,7 +34,7 @@ function Account() {
   }, []);
 
   useEffect(() => {
-    if (isPending || !signedIn) return;
+    if (!signedIn || (isPending && !serverEmail)) return;
     let stop = false;
     (async () => {
       try {
@@ -51,7 +55,7 @@ function Account() {
     return () => {
       stop = true;
     };
-  }, [isPending, signedIn]);
+  }, [isPending, serverEmail, signedIn]);
 
   return (
     <main className="cookies">
@@ -66,9 +70,9 @@ function Account() {
         </button>
       </p>
       <h1>{signedIn ? "Your list" : "Log in"}</h1>
-      {isPending ? null : signedIn ? (
+      {isPending && !signedIn ? null : signedIn ? (
         <>
-          <p>Signed in as {user?.displayName || user?.primaryEmail}. Films you mark My list stay on this account.</p>
+          <p>Signed in as {user?.displayName || email}. Films you mark My list stay on this account.</p>
           {films.length ? (
             <ul className="account-list">
               {films.map((film) => (
@@ -91,7 +95,8 @@ function Account() {
         </>
       ) : (
         <>
-          <p>Sign in with Google, X, or an email and password. An account is created for you, and your list of films is kept on it.</p>
+          <p>Use email and a password. A new address creates the account, and your list of films stays on it. Google and X can’t return to this site yet.</p>
+          <EmailSignIn />
           <button
             type="button"
             className="btn-google"
@@ -147,26 +152,29 @@ function EmailSignIn() {
     }
     setBusy(true);
     setError("");
-    const signed = await authClient.signIn.email({ email: address, password, callbackURL: "/account" });
-    if (!signed.error) {
-      if (signed.data?.token) rememberSessionToken(signed.data.token);
-      window.location.assign("/account");
-      return;
-    }
-    const created = await authClient.signUp.email({
-      email: address,
-      password,
-      name: address.split("@")[0] || "Reader",
-      callbackURL: "/account",
-    });
-    if (!created.error) {
-      if (created.data?.token) rememberSessionToken(created.data.token);
-      window.location.assign("/account");
-      return;
+    try {
+      const signed = await authClient.signIn.email({ email: address, password });
+      if (!signed.error) {
+        if (signed.data?.token) rememberSessionToken(signed.data.token);
+        window.location.assign("/account");
+        return;
+      }
+      const created = await authClient.signUp.email({
+        email: address,
+        password,
+        name: address.split("@")[0] || "Reader",
+      });
+      if (!created.error) {
+        if (created.data?.token) rememberSessionToken(created.data.token);
+        window.location.assign("/account");
+        return;
+      }
+      const message = created.error.message ?? signed.error.message ?? "";
+      setError(/exist/i.test(message) ? "That password doesn’t match this email." : message || "Sign-in didn’t finish.");
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "Sign-in didn’t finish.");
     }
     setBusy(false);
-    const message = created.error.message ?? "";
-    setError(/exist/i.test(message) ? "That password doesn’t match this email." : message || "Sign-in didn’t finish.");
   }
 
   return (

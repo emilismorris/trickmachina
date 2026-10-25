@@ -32,6 +32,12 @@ function saved(input: unknown): ToggleInput {
   };
 }
 
+export const currentAccount = createServerFn({ method: "GET" }).handler(async () => {
+  const { getSessionUser } = await import("@/lib/auth/verify.server");
+  const user = await getSessionUser();
+  return { email: user?.email ?? null };
+});
+
 export const listFavorites = createServerFn({ method: "GET" })
   .middleware([authMiddleware])
   .handler(async ({ context }): Promise<SavedFilm[]> => {
