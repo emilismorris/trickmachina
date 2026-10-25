@@ -608,9 +608,9 @@ export function CatalogScreen({ catalog, onNeedMore }: { catalog: Catalog; onNee
           <X aria-hidden="true" />
         </Link>
         <nav className={menu ? "nav-links is-open" : "nav-links"} aria-label="Menu">
-          <Link to="/" className="nav-link" onClick={() => setMenu(false)}>
+          <button type="button" className="nav-link" onClick={() => go("home")}>
             Home
-          </Link>
+          </button>
           <Link to="/about" className="nav-link" onClick={() => setMenu(false)}>
             About
           </Link>
