@@ -36,8 +36,8 @@ function Home() {
   return (
     <main className="stage">
       {motion ? (
-        <video className="bg-video" poster="/media/home-loop.webp" autoPlay muted loop playsInline preload="auto" aria-hidden="true">
-          <source src="/media/home-loop.mp4" type="video/mp4" />
+        <video className="bg-video" poster="/media/home-plaza.webp" autoPlay muted loop playsInline preload="auto" aria-hidden="true">
+          <source src="/media/home-plaza.mp4" type="video/mp4" />
         </video>
       ) : null}
       <div className="stack" data-ready="true">
