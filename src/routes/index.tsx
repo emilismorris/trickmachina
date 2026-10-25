@@ -21,8 +21,8 @@ const DISCIPLINES = [
 ] as const;
 
 const COUNTS = [
-  { id: "skate", label: "Skate", count: 2091 },
-  { id: "bmx", label: "BMX", count: 20906 },
+  { id: "skate", label: "Skate", count: 1992 },
+  { id: "bmx", label: "BMX", count: 20887 },
   { id: "blades", label: "Blades", count: 636 },
   { id: "scoot", label: "Scoot", count: 1773 },
 ] as const;
