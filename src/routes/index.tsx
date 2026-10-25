@@ -42,9 +42,9 @@ function Home() {
         <div className="floor">
           <div className="archive-head">
             <h1 className="archive-title">The Archive</h1>
-            <p className="archive-line">
+            <Link to="/about" className="archive-line">
               Free archive of skate, BMX, blades & scoot full lengths. No dead links.
-            </p>
+            </Link>
             <p className="archive-counts" aria-label="Videos by discipline">
               {COUNTS.map((item, i) => (
                 <span key={item.id}>
