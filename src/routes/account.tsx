@@ -23,6 +23,13 @@ function Account() {
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
+    const code = new URLSearchParams(window.location.search).get("error");
+    if (code && /redirect|callback/i.test(code)) {
+      setError("Google and X can’t return to this site. Use email and a password — that creates the account.");
+    }
+  }, []);
+
+  useEffect(() => {
     if (isPending || !signedIn) return;
     let stop = false;
     (async () => {
@@ -94,7 +101,7 @@ function Account() {
               setError("");
               void signIn("grok-google", { callbackURL: "/account", errorCallbackURL: "/account" }).catch((reason: unknown) => {
                 setBusy(false);
-                setError(reason instanceof Error ? reason.message : "Google sign-in didn’t finish.");
+                setError(signInError(reason));
               });
             }}
           >
@@ -110,7 +117,7 @@ function Account() {
               setError("");
               void signIn("grok-x", { callbackURL: "/account", errorCallbackURL: "/account" }).catch((reason: unknown) => {
                 setBusy(false);
-                setError(reason instanceof Error ? reason.message : "X sign-in didn’t finish.");
+                setError(signInError(reason));
               });
             }}
           >
@@ -194,6 +201,12 @@ function XMark() {
       <path fill="currentColor" d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.727-8.835L1.254 2.25H8.08l4.253 5.622L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
     </svg>
   );
+}
+
+function signInError(reason: unknown) {
+  const message = reason instanceof Error ? reason.message : "Sign-in didn’t finish.";
+  if (/redirect|callback/i.test(message)) return "Google and X can’t return to this site. Use email and a password — that creates the account.";
+  return message;
 }
 
 function GoogleMark() {
