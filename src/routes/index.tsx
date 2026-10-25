@@ -25,13 +25,27 @@ function Home() {
   const [hover, setHover] = useState<string | null>(null);
   const active = DISCIPLINES.find((item) => item.id === (hover ?? pressed));
 
+  const [wide, setWide] = useState(false);
+
   useEffect(() => {
     track("landing");
+    const mq = window.matchMedia("(min-width: 768px)");
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const sync = () => setWide(mq.matches && !reduce.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    reduce.addEventListener("change", sync);
+    return () => {
+      mq.removeEventListener("change", sync);
+      reduce.removeEventListener("change", sync);
+    };
   }, []);
 
   return (
     <main className="stage">
-      <video className="bg-video" poster="/media/plaza-loop.webp" autoPlay muted loop playsInline preload="auto" aria-hidden="true" src="/media/plaza-loop.mp4" />
+      {wide ? (
+        <video className="bg-video" poster="/media/desk-loop.webp" autoPlay muted loop playsInline preload="auto" aria-hidden="true" src="/media/desk-loop.mp4" />
+      ) : null}
       <div className="stack" data-ready="true">
         <div className="floor">
           <div className="archive-head">
