@@ -60,25 +60,6 @@ async function replacePreviewPassword(request: Request): Promise<Response | null
   return Response.json({ ok: true });
 }
 
-async function rejectOtherAdmins(request: Request) {
-  if (request.method !== "POST") return null;
-  const path = new URL(request.url).pathname;
-  const watched = path.endsWith("/sign-in/email") || path.endsWith("/sign-up/email");
-  if (!watched) return null;
-  let email = "";
-  try {
-    const body = (await request.clone().json()) as { email?: unknown };
-    email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
-  } catch {
-    email = "";
-  }
-  if (email === ADMIN_EMAIL) return null;
-  return new Response(JSON.stringify({ message: "Only the admin can sign in." }), {
-    status: 403,
-    headers: { "content-type": "application/json" },
-  });
-}
-
 function withPrefixCookie(response: Response, prefix: string): Response {
   const headers = new Headers();
   response.headers.forEach((value, key) => {
@@ -110,7 +91,7 @@ export const Route = createFileRoute("/api/auth/$")({
   server: {
     handlers: {
       GET: ({ request }) => handleAuth(request),
-      POST: async ({ request }) => (await rejectOtherAdmins(request)) ?? handleAuth(request),
+      POST: ({ request }) => handleAuth(request),
     },
   },
 });
