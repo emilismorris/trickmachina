@@ -10,15 +10,15 @@ import { pageHead } from "@/lib/seo";
 const PAGES: Record<string, { title: string; description: string }> = {
   skate: {
     title: "Skate Videos 1984–2026 — Trick Machina",
-    description: "2,091 skate videos, 1984–2026, sorted by era, team, brand and scene. Free to watch.",
+    description: "2,091 skate videos, 1984–2026, classics first, then by year. Free to watch.",
   },
   bmx: {
     title: "BMX Videos 1985–2026 — Trick Machina",
-    description: "20,906 BMX videos, 1985–2026, sorted by era, team and scene. Free to watch.",
+    description: "20,906 BMX videos, 1985–2026, classics first, then by year. Free to watch.",
   },
   blades: {
     title: "Blades Videos 1923–2026 — Trick Machina",
-    description: "636 blades videos, 1923–2026, sorted by era and scene. Free to watch.",
+    description: "636 blades videos, 1923–2026, classics first, then by year. Free to watch.",
   },
   scoot: {
     title: "Scoot Videos 2013–2026 — Trick Machina",
@@ -79,8 +79,8 @@ function DisciplinePage() {
   }, [discipline, ready]);
 
   useEffect(() => {
-    if (discipline !== "bmx") loadFull();
-  }, [discipline, loadFull]);
+    loadFull();
+  }, [loadFull]);
 
   if (failed && !catalog.films[catalog.featuredId]) {
     return (

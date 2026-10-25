@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Check, ChevronLeft, ChevronRight, Menu, Play, Plus, Search, X } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, Menu, Play, Plus, X } from "lucide-react";
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import type { Catalog, CatalogView, Film, RowShelf, Shelf, Watch } from "@/data/types";
 import { track } from "@/lib/track";
@@ -520,73 +520,61 @@ export function CatalogScreen({ catalog, onNeedMore }: { catalog: Catalog; onNee
 
   const current: CatalogView | null = view !== "home" ? (catalog.views[view] ?? null) : null;
   const focusTop = focus[focus.length - 1] ?? null;
-  const savedFilms = filmsFrom(saved.ids, catalog.films);
   const searchingNow = query.trim().length >= 2;
   const viewFilms = useMemo(
     () => (current?.mode === "grid" ? filmsFrom(current.filmIds ?? [], catalog.films) : []),
     [current, catalog.films],
   );
   const focusFilms = useMemo(() => (focusTop ? filmsFrom(focusTop.filmIds, catalog.films) : []), [focusTop, catalog.films]);
+  const yearShelves = useMemo(() => {
+    const classics: Film[] = [];
+    const byYear = new Map<number, Film[]>();
+    const undated: Film[] = [];
+    for (const film of Object.values(catalog.films)) {
+      if (film.year >= 1980 && film.year <= 1999) classics.push(film);
+      else if (film.year >= 1900) {
+        const list = byYear.get(film.year);
+        if (list) list.push(film);
+        else byYear.set(film.year, [film]);
+      } else undated.push(film);
+    }
+    classics.sort((a, b) => a.year - b.year || a.title.localeCompare(b.title));
+    for (const list of byYear.values()) list.sort((a, b) => a.title.localeCompare(b.title));
+    undated.sort((a, b) => a.title.localeCompare(b.title));
+    const years = [...byYear.keys()].sort((a, b) => {
+      const aModern = a >= 2000;
+      const bModern = b >= 2000;
+      if (aModern !== bModern) return aModern ? -1 : 1;
+      return b - a;
+    });
+    return { classics, years, byYear, undated };
+  }, [catalog.films]);
+  const headerName = catalog.id === "skate" ? "Skate" : catalog.name;
 
   return (
     <div className="catalog" data-id={catalog.id} data-shape={catalog.shape}>
-      <header className={solid || view !== "home" ? "topnav is-solid" : "topnav"}>
-        <Link to="/" className="wordmark" aria-label="Trick Machina home">
-          <img src="/media/wordmark.webp" alt="Trick Machina" />
-        </Link>
-        <p className="discipline-name">{catalog.name}</p>
+      <header className={solid ? "topnav is-solid" : "topnav"}>
         <button type="button" className="icon-btn menu-btn" aria-label={menu ? "Close menu" : "Open menu"} aria-expanded={menu} onClick={() => setMenu((open) => !open)}>
-          {menu ? <X aria-hidden="true" /> : <Menu aria-hidden="true" />}
+          <Menu aria-hidden="true" />
         </button>
-        <nav className={menu ? "nav-links is-open" : "nav-links"} aria-label="Browse">
-          <Link to="/" className="nav-link nav-back" aria-label="Back to the archive" onClick={() => setMenu(false)}>
-            <ChevronLeft aria-hidden="true" />
-            Back
-          </Link>
-          {catalog.nav.map((item) => (
-            <button key={item.id} type="button" className="nav-link" aria-pressed={view === item.id && !searchingNow} onClick={() => go(item.id)}>
-              {item.label}
-            </button>
-          ))}
-          <Link to="/contact" className="nav-link" onClick={() => setMenu(false)}>
-            Contact
-          </Link>
+        <h1 className="discipline-name">{headerName}</h1>
+        <Link to="/" className="icon-btn exit-btn" aria-label="Back to the archive">
+          <X aria-hidden="true" />
+        </Link>
+        <nav className={menu ? "nav-links is-open" : "nav-links"} aria-label="Menu">
           <Link to="/about" className="nav-link" onClick={() => setMenu(false)}>
             About
+          </Link>
+          <Link to="/contact" className="nav-link" onClick={() => setMenu(false)}>
+            Contacts
           </Link>
           <Link to="/cookies" className="nav-link" onClick={() => setMenu(false)}>
             Cookies
           </Link>
+          <Link to="/settings" className="nav-link" onClick={() => setMenu(false)}>
+            Settings
+          </Link>
         </nav>
-        <div className={searching ? "nav-tools is-search" : "nav-tools"}>
-          {searching ? (
-            <label className="nav-search">
-              <Search aria-hidden="true" />
-              <input
-                ref={searchRef}
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder="Titles, brands"
-                aria-label="Search films"
-              />
-              <button
-                type="button"
-                className="icon-btn"
-                aria-label="Close search"
-                onClick={() => {
-                  setQuery("");
-                  setSearching(false);
-                }}
-              >
-                <X aria-hidden="true" />
-              </button>
-            </label>
-          ) : (
-            <button type="button" className="icon-btn" aria-label="Search" onClick={() => setSearching(true)}>
-              <Search aria-hidden="true" />
-            </button>
-          )}
-        </div>
       </header>
 
       {searchingNow ? (
@@ -716,24 +704,49 @@ export function CatalogScreen({ catalog, onNeedMore }: { catalog: Catalog; onNee
             <span> · {catalog.kicker}</span>
           </p>
           <main className="rows">
-            {savedFilms.length ? (
-              <ShelfRow title="My List" films={savedFilms} total={savedFilms.length} shape={catalog.shape} onOpen={openFilm} />
+            {yearShelves.classics.length ? (
+              <ShelfRow
+                title="Classics"
+                note="1980s and 1990s"
+                total={yearShelves.classics.length}
+                films={yearShelves.classics.slice(0, 12)}
+                shape={catalog.shape}
+                onOpen={openFilm}
+                onTitle={
+                  yearShelves.classics.length > 12
+                    ? () => showShelf("Classics", yearShelves.classics.map((film) => film.id), undefined, "1980s and 1990s")
+                    : undefined
+                }
+              />
             ) : null}
-            {catalog.home.map((shelf) => {
-              const shown = dailyHomeIds(shelf, day);
+            {yearShelves.years.map((year) => {
+              const list = yearShelves.byYear.get(year) ?? [];
               return (
                 <ShelfRow
-                  key={`${shelf.id}-${day}`}
-                  title={shelf.title}
-                  note={shelf.note}
-                  total={shelf.count ?? shelf.filmIds.length}
-                  films={filmsFrom(shown, catalog.films)}
+                  key={year}
+                  title={String(year)}
+                  total={list.length}
+                  films={list.slice(0, 12)}
                   shape={catalog.shape}
                   onOpen={openFilm}
-                  onTitle={shelf.filmIds.length > shown.length ? () => openShelf(shelf) : undefined}
+                  onTitle={list.length > 12 ? () => showShelf(String(year), list.map((film) => film.id)) : undefined}
                 />
               );
             })}
+            {yearShelves.undated.length ? (
+              <ShelfRow
+                title="Undated"
+                total={yearShelves.undated.length}
+                films={yearShelves.undated.slice(0, 12)}
+                shape={catalog.shape}
+                onOpen={openFilm}
+                onTitle={
+                  yearShelves.undated.length > 12
+                    ? () => showShelf("Undated", yearShelves.undated.map((film) => film.id))
+                    : undefined
+                }
+              />
+            ) : null}
             {onNeedMore ? <div ref={more} className="row-more" aria-hidden="true" /> : null}
           </main>
         </>
