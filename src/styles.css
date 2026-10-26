@@ -66,8 +66,14 @@
 }
 
 /* restored app styles */
-.stage{background:#000;height:100dvh;position:relative;overflow:hidden}
-.bg-art{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 42%;z-index:0;pointer-events:none;opacity:.42}
+.stage{background:#000 url(/media/phone-loop.webp) 50%/cover no-repeat;height:100dvh;position:relative;overflow:hidden}
+.bg-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;pointer-events:none}
+.is-desk{display:none}
+@media (min-width:768px){
+.stage{background-image:url(/media/desk-loop.webp)}
+.is-phone{display:none}
+.is-desk{display:block}
+}
 .stack{z-index:1;height:100dvh;position:relative}
 .floor{z-index:2;flex-direction:column;align-items:center;gap:1.1rem;width:min(100%,48rem);padding:0 .75rem;display:flex;position:absolute;top:50%;left:50%;translate:-50% -50%}
 .archive-head{flex-direction:column;align-items:center;gap:.55rem;text-align:center;display:flex}
@@ -142,7 +148,8 @@ to{opacity:1;translate:0}
 .stack[data-ready=true] .label,.stack[data-ready=true] .soon,.stack[data-ready=true] .archive-title,.stack[data-ready=true] .archive-line,.stack[data-ready=true] .archive-counts{opacity:1;filter:none;animation:none;translate:0}
 .cat:hover .label,.cat:focus-visible .label{translate:0}
 }
-.catalog{--color-accent:#f3eadc;background:radial-gradient(120% 40rem at 50% -10rem, #2a241c 0%, transparent 55%), var(--color-bg);min-height:100dvh;color:var(--color-fg);overflow-x:hidden;animation:slide-down .55s cubic-bezier(.16,.84,.32,1)}
+.catalog{--color-accent:#f3eadc;background:#000;min-height:100dvh;color:var(--color-fg);overflow-x:hidden;animation:slide-down .55s cubic-bezier(.16,.84,.32,1);isolation:isolate}
+.catalog-art{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 40%;opacity:.32;pointer-events:none;z-index:-1}
 .catalog[data-id=bmx]{--color-accent:#c8f5d4;background:radial-gradient(120% 40rem at 50% -10rem,#123028 0%,#0000 55%),#07110e}
 .catalog[data-id=blades]{--color-accent:#d5e7f6;background:radial-gradient(120% 40rem at 50% -10rem,#1a2733 0%,#0000 55%),#0b1014}
 .topnav{z-index:20;background:linear-gradient(#0c0b0ae6,#0000);align-items:center;gap:.75rem;min-height:4.25rem;max-width:100%;padding:.55rem max(1rem, env(safe-area-inset-right)) .55rem max(1.1rem, env(safe-area-inset-left));display:flex;position:sticky;top:0}
