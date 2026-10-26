@@ -25,30 +25,13 @@ function Home() {
   const [hover, setHover] = useState<string | null>(null);
   const active = DISCIPLINES.find((item) => item.id === (hover ?? pressed));
 
-  const [cover, setCover] = useState<"phone" | "desk" | "still">("still");
-
   useEffect(() => {
     track("landing");
-    const mq = window.matchMedia("(min-width: 768px)");
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const sync = () => setCover(reduce.matches ? "still" : mq.matches ? "desk" : "phone");
-    sync();
-    mq.addEventListener("change", sync);
-    reduce.addEventListener("change", sync);
-    return () => {
-      mq.removeEventListener("change", sync);
-      reduce.removeEventListener("change", sync);
-    };
   }, []);
 
   return (
     <main className="stage">
-      {cover === "phone" ? (
-        <video className="bg-video is-phone" poster="/media/phone-loop.webp" autoPlay muted loop playsInline preload="auto" aria-hidden="true" src="/media/phone-loop.mp4" />
-      ) : null}
-      {cover === "desk" ? (
-        <video className="bg-video is-desk" poster="/media/desk-loop.webp" autoPlay muted loop playsInline preload="auto" aria-hidden="true" src="/media/desk-loop.mp4" />
-      ) : null}
+      <img className="bg-art" src="/media/disciplines.webp" alt="" aria-hidden="true" />
       <div className="stack" data-ready="true">
         <div className="floor">
           <div className="archive-head">
