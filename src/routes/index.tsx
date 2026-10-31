@@ -25,18 +25,12 @@ function Home() {
   const [hover, setHover] = useState<string | null>(null);
   const active = DISCIPLINES.find((item) => item.id === (hover ?? pressed));
 
-  const [motion, setMotion] = useState(true);
-
   useEffect(() => {
     track("landing");
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) setMotion(false);
   }, []);
 
   return (
     <main className="stage">
-      {motion ? (
-        <video className="bg-video" poster="/media/desk-loop.webp" autoPlay muted loop playsInline preload="auto" aria-hidden="true" src="/media/desk-loop.mp4" />
-      ) : null}
       <div className="stack" data-ready="true">
         <div className="floor">
           <div className="archive-head">
