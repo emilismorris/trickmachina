@@ -70,7 +70,7 @@
 .stack{z-index:1;height:100dvh;position:relative}
 .floor{z-index:2;flex-direction:column;align-items:center;gap:1.1rem;width:min(100%,48rem);padding:0 .75rem;display:flex;position:absolute;top:50%;left:50%;translate:-50% -50%}
 .archive-head{flex-direction:column;align-items:center;gap:.55rem;text-align:center;display:flex}
-.archive-title{color:#fff;letter-spacing:.12em;text-transform:uppercase;background:#000;opacity:0;margin:0;padding:.22em .5em .26em;font-size:clamp(1.35rem,3.2vw,2.15rem);font-weight:200;line-height:1;display:inline-block}
+.archive-title{color:#fff;letter-spacing:.08em;text-transform:uppercase;text-wrap:balance;background:#000;opacity:0;max-width:100%;margin:0;padding:.22em .5em .26em;font-size:clamp(1.05rem,3.1vw,1.9rem);font-weight:200;line-height:1.15;display:inline-block}
 .archive-line{color:#fff;background:#000;opacity:0;max-width:32rem;margin:0;padding:.28em .55em .34em;font-size:clamp(1rem,2.3vw,1.2rem);font-weight:200;line-height:1.35;display:inline-block}
 .archive-counts{color:#fff;background:#000;opacity:0;max-width:36rem;margin:.35rem 0 0;padding:.22em .55em .28em;font-size:clamp(.85rem,1.8vw,1rem);font-weight:200;line-height:1.35;display:inline-block;letter-spacing:.02em}
 .deck{flex-wrap:nowrap;justify-content:center;align-items:stretch;gap:clamp(.35rem,1.4vw,.8rem);width:100%;display:flex}
