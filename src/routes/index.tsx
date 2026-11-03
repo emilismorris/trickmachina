@@ -33,7 +33,7 @@ function Home() {
     <main className="stage">
       <header className="landing-head">
         <h1 className="archive-title">
-          <img src="/media/wordmark-cut.webp" alt="Street Sports Archives" />
+          <img src="/media/wordmark-white.webp" alt="Street Sports Archives" />
         </h1>
       </header>
       <div className="stack" data-ready="true">
