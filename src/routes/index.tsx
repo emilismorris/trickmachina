@@ -34,7 +34,9 @@ function Home() {
       <div className="stack" data-ready="true">
         <div className="floor">
           <div className="archive-head">
-            <h1 className="archive-title">Street Sports Archives</h1>
+            <h1 className="archive-title">
+              <img src="/media/wordmark.webp" alt="Street Sports Archives" />
+            </h1>
             <Link to="/about" className="archive-line">
               Free archive of skate, BMX, blades & scoot full lengths. No dead links.
             </Link>
