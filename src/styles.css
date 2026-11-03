@@ -74,7 +74,7 @@
 .landing-foot img{width:min(42vw,13rem);height:auto;display:block;filter:drop-shadow(0 0 6px #ffffffcc)}
 .archive-head{flex-direction:column;align-items:center;gap:.55rem;text-align:center;display:flex}
 .archive-title{background:none;opacity:0;width:min(78vw,28rem);margin:0;padding:0;display:block}
-.archive-title img{width:100%;height:auto;display:block}
+.archive-title img{width:100%;height:auto;display:block;filter:drop-shadow(0 0 3px #fff) drop-shadow(0 1px 2px #ffffffcc)}
 .archive-line{color:#fff;background:#000;opacity:0;max-width:32rem;margin:0;padding:.28em .55em .34em;font-size:clamp(1rem,2.3vw,1.2rem);font-weight:200;line-height:1.35;display:inline-block}
 .archive-counts{color:#fff;background:#000;opacity:0;max-width:36rem;margin:.35rem 0 0;padding:.22em .55em .28em;font-size:clamp(.85rem,1.8vw,1rem);font-weight:200;line-height:1.35;display:inline-block;letter-spacing:.02em}
 .deck{flex-wrap:nowrap;justify-content:center;align-items:stretch;gap:clamp(.35rem,1.4vw,.8rem);width:100%;display:flex}
