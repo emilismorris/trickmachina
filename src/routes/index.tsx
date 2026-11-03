@@ -62,14 +62,14 @@ function Home() {
                   onClick={() => setPressed(item.id)}
                   {...handlers}
                 >
-                  <span className="label">{item.label}</span>
+                  <span className="label"><img src={`/media/mark-${item.id}.webp`} alt={item.label} /></span>
                   <span className="soon">(coming soon)</span>
                 </button>
               );
             }
             return (
               <Link key={item.id} to="/$discipline" params={{ discipline: item.id }} className="cat" data-cat={item.id} {...handlers}>
-                <span className="label">{item.label}</span>
+                <span className="label"><img src={`/media/mark-${item.id}.webp`} alt={item.label} /></span>
               </Link>
             );
           })}
