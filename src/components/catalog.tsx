@@ -666,7 +666,9 @@ export function CatalogScreen({ catalog, onNeedMore }: { catalog: Catalog; onNee
         <button type="button" className="icon-btn menu-btn" aria-label={menu ? "Close menu" : "Open menu"} aria-expanded={menu} onClick={() => setMenu((open) => !open)}>
           <Menu aria-hidden="true" />
         </button>
-        <h1 className="discipline-name">{headerName}</h1>
+        <h1 className="discipline-name">
+          <img src={`/media/head-${catalog.id}.webp`} alt={headerName} />
+        </h1>
         <Link to="/" className="icon-btn exit-btn" aria-label="Back to the archive">
           <X aria-hidden="true" />
         </Link>
