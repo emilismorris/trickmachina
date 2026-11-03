@@ -31,12 +31,14 @@ function Home() {
 
   return (
     <main className="stage">
+      <header className="landing-head">
+        <h1 className="archive-title">
+          <img src="/media/wordmark-cut.webp" alt="Street Sports Archives" />
+        </h1>
+      </header>
       <div className="stack" data-ready="true">
         <div className="floor">
           <div className="archive-head">
-            <h1 className="archive-title">
-              <img src="/media/wordmark-cut.webp" alt="Street Sports Archives" />
-            </h1>
             <Link to="/about" className="archive-line">
               Free archive of skate, BMX, blades & scoot full lengths. No dead links.
             </Link>
