@@ -76,6 +76,9 @@ function Home() {
           </section>
         </div>
       </div>
+      <footer className="landing-foot">
+        <img src="/media/mark-trick.webp" alt="Trick Machina" />
+      </footer>
       <p className="sr-only" aria-live="polite">
         {active ? active.gear : ""}
       </p>
