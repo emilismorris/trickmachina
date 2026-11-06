@@ -666,12 +666,28 @@ export function CatalogScreen({ catalog, onNeedMore }: { catalog: Catalog; onNee
         <button type="button" className="icon-btn menu-btn" aria-label={menu ? "Close menu" : "Open menu"} aria-expanded={menu} onClick={() => setMenu((open) => !open)}>
           <Menu aria-hidden="true" />
         </button>
-        <h1 className="discipline-name">
-          <img src={`/media/head-${catalog.id}.webp`} alt={headerName} />
-        </h1>
-        <Link to="/" className="icon-btn exit-btn" aria-label="Back to the archive">
-          <X aria-hidden="true" />
-        </Link>
+        <h1 className="sr-only">{headerName}</h1>
+        <nav className="disc-menu" aria-label="Disciplines">
+          {(
+            [
+              ["skate", "Skate"],
+              ["bmx", "BMX"],
+              ["scoot", "Scoot"],
+              ["blades", "Blades"],
+            ] as const
+          ).map(([id, label]) => (
+            <Link
+              key={id}
+              to="/$discipline"
+              params={{ discipline: id }}
+              className="disc-link"
+              aria-current={catalog.id === id ? "page" : undefined}
+              aria-label={label}
+            >
+              <img src={`/media/head-${id}.webp`} alt="" />
+            </Link>
+          ))}
+        </nav>
         <nav className={menu ? "nav-links is-open" : "nav-links"} aria-label="Menu">
           <button type="button" className="nav-link" onClick={() => go("home")}>
             Home

@@ -159,8 +159,11 @@ to{opacity:1;translate:0}
 .wordmark{flex:none;align-items:center;display:flex}
 .wordmark img{width:auto;height:1.35rem}
 @keyframes slide-down{from{transform:translateY(-14vh)}to{transform:none}}
-.discipline-name{flex:1;min-width:0;align-items:center;justify-content:center;margin:0;display:flex}
-.discipline-name img{height:2.45rem;width:auto;max-width:min(58vw,20rem);object-fit:contain;display:block}
+.disc-menu{flex:1;min-width:0;align-items:center;justify-content:space-between;gap:.4rem;display:flex}
+.disc-link{flex:1 1 0;min-width:0;opacity:.4;align-items:center;justify-content:center;display:flex}
+.disc-link[aria-current=page]{opacity:1}
+.disc-link img{height:2.2rem;width:100%;max-width:9rem;object-fit:contain;display:block}
+@media (width<=640px){.disc-link img{height:1.55rem}}
 .nav-links{border-bottom:1px solid var(--color-line);background:#0c0b0af5;flex-direction:column;align-items:stretch;width:min(16rem,100%);max-height:70dvh;padding:.35rem .6rem .8rem;display:none;position:absolute;top:100%;left:0;overflow:auto;z-index:30}
 .nav-links.is-open{display:flex}
 .nav-link{min-height:2.75rem;color:var(--color-muted);font:inherit;letter-spacing:.08em;text-transform:uppercase;background:0 0;border:0;flex:none;padding:0 .7rem;font-size:.78rem;text-decoration:none;display:inline-flex;align-items:center;text-align:left;justify-content:flex-start}
@@ -364,7 +367,7 @@ to{opacity:1;translate:0}
 }
 @media (width>=800px){.stat-grid{grid-template-columns:repeat(4,1fr)}
 }
-@media (width<=860px){.topnav:has(.is-search) .menu-btn,.topnav:has(.is-search) .discipline-name{display:none}
+@media (width<=860px){.topnav:has(.is-search) .menu-btn,.topnav:has(.is-search) .disc-menu{display:none}
 .admin-bar{padding-left:1rem;padding-right:1rem}
 .admin-wrap{padding:1.25rem 1rem 3rem}
 }
