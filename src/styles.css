@@ -202,7 +202,7 @@ to{opacity:1;translate:0}
 .home-count{color:var(--color-muted);letter-spacing:.04em;margin:.2rem 0 .4rem;padding:0 6vw;font-size:.85rem}
 .home-count span{color:var(--color-muted)}
 .rows{flex-direction:column;gap:1.35rem;padding:.6rem 0 3.5rem;display:flex}
-.shelf-section{letter-spacing:.16em;text-transform:uppercase;margin:1.4rem 0 -.55rem;padding:0 6vw;font-size:.78rem;font-weight:500}
+.shelf{content-visibility:auto;contain-intrinsic-size:auto 220px}
 .shelf-title{min-height:2.75rem;color:inherit;font:inherit;background:0 0;border:0;align-items:baseline;gap:.7rem;padding:0;display:inline-flex}
 .shelf-title h2{letter-spacing:.04em;margin:0;font-size:1.15rem;font-weight:500}
 .shelf-count,.shelf-title span{color:var(--color-muted);letter-spacing:.12em;text-transform:uppercase;font-size:.72rem}

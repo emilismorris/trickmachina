@@ -809,7 +809,7 @@ export function CatalogScreen({ catalog, onNeedMore }: { catalog: Catalog; onNee
         <>
           {hero ? (
             <section className="billboard">
-              {hero.thumb ? <img className="billboard-art" src={hero.thumb} alt="" /> : null}
+              {hero.thumb ? <img className="billboard-art" src={hero.thumb} alt="" decoding="async" onError={(event) => (event.currentTarget.style.display = "none")} /> : null}
               <div className="billboard-copy">
                 <p className="kicker">{[hero.company, hero.year > 0 ? hero.year : null].filter(Boolean).join(" · ") || catalog.kicker}</p>
                 <h1>{hero.title}</h1>
@@ -908,7 +908,7 @@ export function CatalogScreen({ catalog, onNeedMore }: { catalog: Catalog; onNee
               <Player film={active} />
             ) : (
               <div className={`detail-hero tone-${tone(active.id)}`}>
-                {active.thumb ? <img src={active.thumb} alt="" /> : null}
+                {active.thumb ? <img src={active.thumb} alt="" decoding="async" onError={(event) => (event.currentTarget.style.display = "none")} /> : null}
               </div>
             )}
             <div className="detail-body">

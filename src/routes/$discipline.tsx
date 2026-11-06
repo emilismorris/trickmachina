@@ -56,7 +56,7 @@ function DisciplinePage() {
   const shell = Route.useLoaderData();
   const [catalog, setCatalog] = useState<Catalog>(shell);
   const [failed, setFailed] = useState(false);
-  const ready = Object.keys(catalog.views).length > 0;
+  const ready = catalog.id === discipline && Object.keys(catalog.views).length > 0;
 
   useEffect(() => {
     setCatalog(shell);
@@ -74,13 +74,30 @@ function DisciplinePage() {
         if (!response.ok) throw new Error("missing");
         return response.json() as Promise<Catalog>;
       })
-      .then(setCatalog)
+      .then((data) => {
+        if (data.id === discipline) setCatalog(data);
+      })
       .catch(() => setFailed(true));
   }, [discipline, ready]);
 
   useEffect(() => {
-    loadFull();
-  }, [loadFull]);
+    const controller = new AbortController();
+    if (!ready) {
+      fetch(`/catalogs/${discipline}.json`, { signal: controller.signal })
+        .then((response) => {
+          if (!response.ok) throw new Error("missing");
+          return response.json() as Promise<Catalog>;
+        })
+        .then((data) => {
+          if (data.id === discipline) setCatalog(data);
+        })
+        .catch((err: unknown) => {
+          if (err instanceof DOMException && err.name === "AbortError") return;
+          setFailed(true);
+        });
+    }
+    return () => controller.abort();
+  }, [discipline, ready]);
 
   if (failed && !catalog.films[catalog.featuredId]) {
     return (

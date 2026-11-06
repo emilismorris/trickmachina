@@ -5,10 +5,10 @@ const DISCIPLINES = ["skate", "bmx", "blades", "scoot"] as const;
 type Discipline = (typeof DISCIPLINES)[number];
 
 const shells: Record<Discipline, () => Promise<{ default: Catalog }>> = {
-  skate: () => import("@/data/shells/skate.json"),
-  bmx: () => import("@/data/shells/bmx.json"),
-  blades: () => import("@/data/shells/blades.json"),
-  scoot: () => import("@/data/shells/scoot.json"),
+  skate: () => import("@/data/shells/skate.json") as Promise<{ default: Catalog }>,
+  bmx: () => import("@/data/shells/bmx.json") as Promise<{ default: Catalog }>,
+  blades: () => import("@/data/shells/blades.json") as Promise<{ default: Catalog }>,
+  scoot: () => import("@/data/shells/scoot.json") as Promise<{ default: Catalog }>,
 };
 
 export const loadSectionShell = createServerFn({ method: "GET" })

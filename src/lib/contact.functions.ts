@@ -31,7 +31,7 @@ export const sendContact = createServerFn({ method: "POST" })
     return { name, email, message };
   })
   .handler(async ({ data }) => {
-    if (!data) return { ok: true as const };
+    if (!data) return { ok: true as const, mailed: false };
     const { deliverContact } = await import("./contact.server");
     return deliverContact(data);
   });
