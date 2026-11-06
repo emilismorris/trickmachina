@@ -663,10 +663,14 @@ export function CatalogScreen({ catalog, onNeedMore }: { catalog: Catalog; onNee
     <div className="catalog" data-id={catalog.id} data-shape={catalog.shape}>
       <img className="catalog-art" src="/media/disciplines.webp" alt="" aria-hidden="true" />
       <header className={solid ? "topnav is-solid" : "topnav"}>
-        <button type="button" className="icon-btn menu-btn" aria-label={menu ? "Close menu" : "Open menu"} aria-expanded={menu} onClick={() => setMenu((open) => !open)}>
-          <Menu aria-hidden="true" />
-        </button>
-        <h1 className="sr-only">{headerName}</h1>
+        <div className="brand-wrap">
+          <button type="button" className="icon-btn menu-btn" aria-label={menu ? "Close menu" : "Open menu"} aria-expanded={menu} onClick={() => setMenu((open) => !open)}>
+            <Menu aria-hidden="true" />
+          </button>
+          <h1 className="brand-line">
+            <img src="/media/wordmark-line.webp" alt="Street Sports Archives" />
+          </h1>
+        </div>
         <nav className="disc-menu" aria-label="Disciplines">
           {(
             [
