@@ -657,7 +657,6 @@ export function CatalogScreen({ catalog, onNeedMore }: { catalog: Catalog; onNee
   const openGrouped = (title: string, films: Film[], note?: string) => {
     showShelf(title, [], undefined, note, brandShelves(films, baltic));
   };
-  const headerName = catalog.id === "skate" ? "Skate" : catalog.name;
 
   return (
     <div className="catalog" data-id={catalog.id} data-shape={catalog.shape}>
