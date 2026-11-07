@@ -667,7 +667,7 @@ export function CatalogScreen({ catalog, onNeedMore }: { catalog: Catalog; onNee
             <Menu aria-hidden="true" />
           </button>
           <h1 className="brand-line">
-            <img src="/media/wordmark-line2.webp" alt="Street Sports Archives" />
+            <img src="/media/wordmark-line.webp" alt="Street Sports Archives" />
           </h1>
         </div>
         <nav className="disc-menu" aria-label="Disciplines">
