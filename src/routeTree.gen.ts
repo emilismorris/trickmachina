@@ -18,7 +18,9 @@ import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CookiesRouteImport } from './routes/cookies'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as DisciplineFilmRouteImport } from './routes/$discipline.$film'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as ApiCronEmbedsRouteImport } from './routes/api/cron/embeds'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -65,15 +67,25 @@ const SettingsRoute = SettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DisciplineFilmRoute = DisciplineFilmRouteImport.update({
+  id: '/$film',
+  path: '/$film',
+  getParentRoute: () => DisciplineRoute,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiCronEmbedsRoute = ApiCronEmbedsRouteImport.update({
+  id: '/api/cron/embeds',
+  path: '/api/cron/embeds',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/$discipline': typeof DisciplineRoute
+  '/$discipline': typeof DisciplineRouteWithChildren
   '/about': typeof AboutRoute
   '/account': typeof AccountRoute
   '/admin': typeof AdminRoute
@@ -81,11 +93,13 @@ export interface FileRoutesByFullPath {
   '/cookies': typeof CookiesRoute
   '/login': typeof LoginRoute
   '/settings': typeof SettingsRoute
+  '/$discipline/$film': typeof DisciplineFilmRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/cron/embeds': typeof ApiCronEmbedsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/$discipline': typeof DisciplineRoute
+  '/$discipline': typeof DisciplineRouteWithChildren
   '/about': typeof AboutRoute
   '/account': typeof AccountRoute
   '/admin': typeof AdminRoute
@@ -93,12 +107,14 @@ export interface FileRoutesByTo {
   '/cookies': typeof CookiesRoute
   '/login': typeof LoginRoute
   '/settings': typeof SettingsRoute
+  '/$discipline/$film': typeof DisciplineFilmRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/cron/embeds': typeof ApiCronEmbedsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/$discipline': typeof DisciplineRoute
+  '/$discipline': typeof DisciplineRouteWithChildren
   '/about': typeof AboutRoute
   '/account': typeof AccountRoute
   '/admin': typeof AdminRoute
@@ -106,7 +122,9 @@ export interface FileRoutesById {
   '/cookies': typeof CookiesRoute
   '/login': typeof LoginRoute
   '/settings': typeof SettingsRoute
+  '/$discipline/$film': typeof DisciplineFilmRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/cron/embeds': typeof ApiCronEmbedsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -120,7 +138,9 @@ export interface FileRouteTypes {
     | '/cookies'
     | '/login'
     | '/settings'
+    | '/$discipline/$film'
     | '/api/auth/$'
+    | '/api/cron/embeds'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -132,7 +152,9 @@ export interface FileRouteTypes {
     | '/cookies'
     | '/login'
     | '/settings'
+    | '/$discipline/$film'
     | '/api/auth/$'
+    | '/api/cron/embeds'
   id:
     | '__root__'
     | '/'
@@ -144,12 +166,14 @@ export interface FileRouteTypes {
     | '/cookies'
     | '/login'
     | '/settings'
+    | '/$discipline/$film'
     | '/api/auth/$'
+    | '/api/cron/embeds'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  DisciplineRoute: typeof DisciplineRoute
+  DisciplineRoute: typeof DisciplineRouteWithChildren
   AboutRoute: typeof AboutRoute
   AccountRoute: typeof AccountRoute
   AdminRoute: typeof AdminRoute
@@ -158,6 +182,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   SettingsRoute: typeof SettingsRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiCronEmbedsRoute: typeof ApiCronEmbedsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -225,6 +250,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/$discipline/$film': {
+      id: '/$discipline/$film'
+      path: '/$film'
+      fullPath: '/$discipline/$film'
+      preLoaderRoute: typeof DisciplineFilmRouteImport
+      parentRoute: typeof DisciplineRoute
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -232,12 +264,31 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/cron/embeds': {
+      id: '/api/cron/embeds'
+      path: '/api/cron/embeds'
+      fullPath: '/api/cron/embeds'
+      preLoaderRoute: typeof ApiCronEmbedsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
+interface DisciplineRouteChildren {
+  DisciplineFilmRoute: typeof DisciplineFilmRoute
+}
+
+const DisciplineRouteChildren: DisciplineRouteChildren = {
+  DisciplineFilmRoute: DisciplineFilmRoute,
+}
+
+const DisciplineRouteWithChildren = DisciplineRoute._addFileChildren(
+  DisciplineRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  DisciplineRoute: DisciplineRoute,
+  DisciplineRoute: DisciplineRouteWithChildren,
   AboutRoute: AboutRoute,
   AccountRoute: AccountRoute,
   AdminRoute: AdminRoute,
@@ -246,6 +297,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   SettingsRoute: SettingsRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiCronEmbedsRoute: ApiCronEmbedsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
