@@ -687,7 +687,7 @@ export function CatalogScreen({ catalog, onNeedMore }: { catalog: Catalog; onNee
               aria-current={catalog.id === id ? "page" : undefined}
               aria-label={label}
             >
-              <img src={id === "skate" ? "/media/head-skate-fat.webp" : `/media/head-${id}.webp`} alt="" />
+              <img src={`/media/head-${id}-red.webp`} alt="" />
             </Link>
           ))}
         </nav>
