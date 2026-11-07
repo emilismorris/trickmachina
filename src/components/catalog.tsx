@@ -500,6 +500,7 @@ export function CatalogScreen({ catalog, onNeedMore }: { catalog: Catalog; onNee
   const [active, setActive] = useState<Film | null>(null);
   const [playing, setPlaying] = useState(false);
   const [limit, setLimit] = useState(PAGE);
+  const [rowCount, setRowCount] = useState(8);
   const [day, setDay] = useState(dayNumber);
   const searchRef = useRef<HTMLInputElement>(null);
   const saved = useSaved(catalog);
@@ -515,14 +516,20 @@ export function CatalogScreen({ catalog, onNeedMore }: { catalog: Catalog; onNee
   }, [day]);
 
   useEffect(() => {
+    setRowCount(8);
+  }, [catalog.id]);
+
+  useEffect(() => {
     const node = more.current;
-    if (!node || !onNeedMore) return;
+    if (!node) return;
     const observer = new IntersectionObserver((entries) => {
-      if (entries.some((entry) => entry.isIntersecting)) onNeedMore();
-    }, { rootMargin: "600px" });
+      if (!entries.some((entry) => entry.isIntersecting)) return;
+      setRowCount((count) => count + 8);
+      onNeedMore?.();
+    }, { rootMargin: "700px" });
     observer.observe(node);
     return () => observer.disconnect();
-  }, [onNeedMore]);
+  }, [onNeedMore, rowCount, catalog.id]);
 
   useEffect(() => {
     const onScroll = () => {
@@ -660,7 +667,7 @@ export function CatalogScreen({ catalog, onNeedMore }: { catalog: Catalog; onNee
 
   return (
     <div className="catalog" data-id={catalog.id} data-shape={catalog.shape}>
-      <img className="catalog-art" src="/media/disciplines.webp" alt="" aria-hidden="true" />
+      <img className="catalog-art" src="/media/disciplines-lite.webp" alt="" aria-hidden="true" decoding="async" fetchPriority="low" />
       <header className={solid ? "topnav is-solid" : "topnav"}>
         <div className="brand-wrap">
           <button type="button" className="icon-btn menu-btn" aria-label={menu ? "Close menu" : "Open menu"} aria-expanded={menu} onClick={() => setMenu((open) => !open)}>
@@ -809,7 +816,7 @@ export function CatalogScreen({ catalog, onNeedMore }: { catalog: Catalog; onNee
         <>
           {hero ? (
             <section className="billboard">
-              {hero.thumb ? <img className="billboard-art" src={hero.thumb} alt="" decoding="async" onError={(event) => (event.currentTarget.style.display = "none")} /> : null}
+              {hero.thumb ? <img className="billboard-art" src={hero.thumb} alt="" decoding="async" fetchPriority="high" onError={(event) => (event.currentTarget.style.display = "none")} /> : null}
               <div className="billboard-copy">
                 <p className="kicker">{[hero.company, hero.year > 0 ? hero.year : null].filter(Boolean).join(" · ") || catalog.kicker}</p>
                 <h1>{hero.title}</h1>
@@ -849,7 +856,7 @@ export function CatalogScreen({ catalog, onNeedMore }: { catalog: Catalog; onNee
                 onTitle={() => openGrouped("Classics", yearShelves.classics, "1980s and 1990s")}
               />
             ) : null}
-            {yearShelves.years.map((year) => {
+            {yearShelves.years.slice(0, rowCount).map((year) => {
               const list = yearShelves.byYear.get(year) ?? [];
               return (
                 <ShelfRow
@@ -873,7 +880,7 @@ export function CatalogScreen({ catalog, onNeedMore }: { catalog: Catalog; onNee
                 onTitle={() => openGrouped("Undated", yearShelves.undated)}
               />
             ) : null}
-            {onNeedMore ? <div ref={more} className="row-more" aria-hidden="true" /> : null}
+            {rowCount < yearShelves.years.length || onNeedMore ? <div ref={more} className="row-more" style={{ height: 1 }} aria-hidden="true" /> : null}
           </main>
         </>
       )}
