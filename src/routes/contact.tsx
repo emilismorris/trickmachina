@@ -3,6 +3,7 @@ import { ChevronLeft } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { sendContact } from "@/lib/contact.functions";
 import { pageHead } from "@/lib/seo";
+import { SiteSearch } from "@/components/site-search";
 
 export const Route = createFileRoute("/contact")({
   head: () => pageHead("Contact — Trick Machina", "Write to Trick Machina.", "/contact"),
@@ -37,6 +38,9 @@ function Contact() {
 
   return (
     <main className="cookies">
+      <div className="page-search">
+        <SiteSearch />
+      </div>
       <p>
         <button
           type="button"

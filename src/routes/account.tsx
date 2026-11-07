@@ -1,5 +1,6 @@
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { ChevronLeft } from "lucide-react";
+import { SiteSearch } from "@/components/site-search";
 import { useEffect, useState, type FormEvent } from "react";
 import { authClient, rememberSessionToken, signOut } from "@/lib/auth/client";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
@@ -59,6 +60,9 @@ function Account() {
 
   return (
     <main className="cookies">
+      <div className="page-search">
+        <SiteSearch />
+      </div>
       <p>
         <button
           type="button"

@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { ChevronLeft } from "lucide-react";
 import { pageHead } from "@/lib/seo";
+import { SiteSearch } from "@/components/site-search";
 
 export const Route = createFileRoute("/about")({
   head: () =>
@@ -26,6 +27,9 @@ function About() {
 
   return (
     <main className="cookies about">
+      <div className="page-search">
+        <SiteSearch />
+      </div>
       <p>
         <button
           type="button"
