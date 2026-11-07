@@ -40,6 +40,9 @@ export function trackPage(path: string) {
   });
 }
 
-export function trackEvent(name: "film_open" | "play", params: { film_id: string; film_title: string; discipline: string }) {
+export function trackEvent(
+  name: "film_open" | "film_view" | "play" | "video_play" | "search",
+  params: Record<string, string>,
+) {
   gtag("event", name, { send_to: GA_ID, ...params });
 }
