@@ -153,9 +153,9 @@ to{opacity:1;translate:0}
 .catalog[data-id=bmx]{--color-accent:#c8f5d4;background:radial-gradient(120% 40rem at 50% -10rem,#123028 0%,#0000 55%),#07110e}
 .catalog[data-id=blades]{--color-accent:#d5e7f6;background:radial-gradient(120% 40rem at 50% -10rem,#1a2733 0%,#0000 55%),#0b1014}
 .topnav{z-index:20;background:#000000e0;align-items:stretch;flex-direction:column;gap:.2rem;min-height:4.25rem;max-width:100%;padding:.4rem max(1rem, env(safe-area-inset-right)) .45rem max(1.1rem, env(safe-area-inset-left));display:flex;position:sticky;top:0}
-.brand-wrap{position:relative;align-items:center;justify-content:center;min-height:2.75rem;display:flex}
-.brand-wrap .menu-btn{position:absolute;left:0;top:50%;translate:0 -50%}
-.brand-line{width:min(78vw,34rem);margin:0 0 0 1.35rem;display:block}
+.brand-wrap{position:relative;z-index:1;align-items:center;justify-content:center;min-height:2.75rem;display:flex}
+.brand-wrap .menu-btn{position:absolute;left:0;top:50%;translate:0 -50%;z-index:3}
+.brand-line{width:min(78vw,34rem);margin:0 0 0 1.35rem;display:block;pointer-events:none}
 .brand-line img{width:100%;height:auto;display:block}
 .topnav.is-solid{border-bottom:1px solid var(--color-line);background:#000000eb}
 .catalog[data-id=bmx] .topnav.is-solid{background:#000000eb}
@@ -163,8 +163,8 @@ to{opacity:1;translate:0}
 .wordmark{flex:none;align-items:center;display:flex}
 .wordmark img{width:auto;height:1.35rem}
 @keyframes slide-down{from{transform:translateY(-14vh)}to{transform:none}}
-.disc-menu{flex:1;min-width:0;align-items:center;justify-content:space-between;gap:.4rem;display:flex}
-.disc-link{flex:1 1 0;min-width:0;opacity:.4;align-items:center;justify-content:center;display:flex}
+.disc-menu{position:relative;z-index:4;flex:1;min-width:0;align-items:center;justify-content:space-between;gap:.4rem;display:flex}
+.disc-link{position:relative;z-index:4;flex:1 1 0;min-width:0;min-height:2.75rem;opacity:.4;align-items:center;justify-content:center;display:flex}
 .disc-link[aria-current=page]{opacity:1}
 .disc-link img{height:2.2rem;width:100%;max-width:9rem;object-fit:contain;display:block}
 .disc-link[aria-label="Skate"] img{max-width:12rem}
