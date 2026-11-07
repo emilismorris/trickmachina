@@ -1,8 +1,11 @@
-import { Link, useRouter } from "@tanstack/react-router";
+import { Link, useNavigate, useParams, useRouter } from "@tanstack/react-router";
 import { Check, ChevronLeft, ChevronRight, Menu, Play, Plus, X } from "lucide-react";
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
+import deadIds from "@/data/dead.json";
 import type { Catalog, CatalogView, Film, RowShelf, Shelf, Watch } from "@/data/types";
+import { SiteSearch } from "@/components/site-search";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
+import { filmSlug } from "@/lib/film-slug";
 import { trackEvent } from "@/lib/ga";
 import { listFavorites, toggleFavorite } from "@/lib/list.functions";
 import { track } from "@/lib/track";
@@ -15,8 +18,11 @@ function tone(id: string) {
   return hash % 6;
 }
 
-function filmsFrom(ids: string[], films: Record<string, Film>) {
-  return ids.map((id) => films[id]).filter((film): film is Film => Boolean(film));
+const DEAD = new Map(Object.entries(deadIds as Record<string, string[]>).map(([key, ids]) => [key, new Set(ids)]));
+
+function filmsFrom(ids: string[], films: Record<string, Film>, discipline: string) {
+  const hidden = DEAD.get(discipline);
+  return ids.map((id) => films[id]).filter((film): film is Film => Boolean(film) && playable(film) && !hidden?.has(film.id));
 }
 
 const INLINE = 56;
@@ -127,6 +133,14 @@ function embedSrc(watch: Watch, part = 0) {
 
 function playable(film: Film) {
   return film.watch.host !== "none";
+}
+
+function listed(film: Film, discipline: string) {
+  return playable(film) && !DEAD.get(discipline)?.has(film.id);
+}
+
+function cardThumb(src: string) {
+  return src.replace("/hqdefault.jpg", "/mqdefault.jpg").replace("/sddefault.jpg", "/mqdefault.jpg").replace("/maxresdefault.jpg", "/mqdefault.jpg");
 }
 
 function canPlay(watch: Watch) {
@@ -252,16 +266,28 @@ function useSaved(catalog: Catalog) {
   return { ids, toggle, signedIn };
 }
 
-function Card({ film, shape, onOpen }: { film: Film; shape: Catalog["shape"]; onOpen: (film: Film) => void }) {
+function Card({ film, shape }: { film: Film; shape: Catalog["shape"] }) {
+  const { discipline } = useParams({ from: "/$discipline" });
+  const wide = shape === "wide";
   return (
-    <button type="button" className={`card card-${shape}`} onClick={() => onOpen(film)}>
+    <Link to="/$discipline/$film" params={{ discipline, film: filmSlug(film) }} className={`card card-${shape}`}>
       <span className={`card-art tone-${tone(film.id)}`}>
         <span className="card-fallback">{film.company || film.title}</span>
-        {film.thumb ? <img src={film.thumb} alt="" loading="lazy" decoding="async" onError={(event) => (event.currentTarget.style.display = "none")} /> : null}
+        {film.thumb ? (
+          <img
+            src={cardThumb(film.thumb)}
+            alt=""
+            width={wide ? 320 : 240}
+            height={wide ? 180 : 360}
+            loading="lazy"
+            decoding="async"
+            onError={(event) => (event.currentTarget.style.display = "none")}
+          />
+        ) : null}
       </span>
       <span className="card-meta">{[film.year > 0 ? film.year : null, film.company].filter(Boolean).join(" · ")}</span>
       <span className="card-title">{film.title}</span>
-    </button>
+    </Link>
   );
 }
 
@@ -368,7 +394,7 @@ function ShelfRow({
         <div className="shelf-row" ref={scroller}>
           {lead > 0 ? <span className="shelf-spacer" style={{ width: lead }} /> : null}
           {films.slice(start, end).map((film) => (
-            <Card key={film.id} film={film} shape={shape} onOpen={onOpen} />
+            <Card key={film.id} film={film} shape={shape} />
           ))}
           {tail > 0 ? <span className="shelf-spacer" style={{ width: tail }} /> : null}
         </div>
@@ -438,7 +464,7 @@ function Grid({ films, shape, onOpen, limit, onMore }: { films: Film[]; shape: C
     <>
       <div className={`result-grid shape-${shape}`}>
         {shown.map((film) => (
-          <Card key={film.id} film={film} shape={shape} onOpen={onOpen} />
+          <Card key={film.id} film={film} shape={shape} />
         ))}
       </div>
       {films.length > shown.length ? (
@@ -490,10 +516,11 @@ function Player({ film }: { film: Film }) {
   );
 }
 
-export function CatalogScreen({ catalog, onNeedMore }: { catalog: Catalog; onNeedMore?: () => void }) {
+export function CatalogScreen({ catalog, onNeedMore, initialQuery = "" }: { catalog: Catalog; onNeedMore?: () => void; initialQuery?: string }) {
+  const navigate = useNavigate();
   const [view, setView] = useState("home");
   const [focus, setFocus] = useState<{ title: string; note?: string; parent?: string; filmIds: string[]; shelves?: RowShelf[] }[]>([]);
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(initialQuery);
   const [searching, setSearching] = useState(false);
   const [menu, setMenu] = useState(false);
   const [solid, setSolid] = useState(false);
@@ -516,8 +543,16 @@ export function CatalogScreen({ catalog, onNeedMore }: { catalog: Catalog; onNee
   }, [day]);
 
   useEffect(() => {
+    setQuery(initialQuery);
     setRowCount(8);
   }, [catalog.id]);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      void navigate({ to: "/$discipline", params: { discipline: catalog.id }, search: { q: query } as never, replace: true });
+    }, 300);
+    return () => window.clearTimeout(timer);
+  }, [query, catalog.id, navigate]);
 
   useEffect(() => {
     const node = more.current;
@@ -563,11 +598,15 @@ export function CatalogScreen({ catalog, onNeedMore }: { catalog: Catalog; onNee
   }, [searching]);
 
   useEffect(() => {
-    if (query.trim().length >= 2) {
+    const q = query.trim();
+    if (q.length < 2) return;
+    const timer = window.setTimeout(() => {
       onNeedMore?.();
-      track("search", query.trim().toLowerCase());
-    }
-  }, [query, onNeedMore]);
+      track("search", q.toLowerCase());
+      trackEvent("search", { search_term: q.toLowerCase(), discipline: catalog.id });
+    }, 450);
+    return () => window.clearTimeout(timer);
+  }, [query, onNeedMore, catalog.id]);
 
   useEffect(() => {
     if (playing && active) {
@@ -581,13 +620,17 @@ export function CatalogScreen({ catalog, onNeedMore }: { catalog: Catalog; onNee
   }, [view, focus, query]);
 
   const results = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (q.length < 2) return [];
+    const terms = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
+    if (terms.join(" ").length < 2) return [];
     return Object.values(catalog.films)
-      .filter((film) => `${film.title} ${film.company} ${film.year} ${film.blurb}`.toLowerCase().includes(q))
+      .filter((film) => listed(film, catalog.id))
+      .filter((film) => {
+        const hay = `${film.title} ${film.company} ${film.year} ${film.blurb}`.toLowerCase();
+        return terms.every((term) => hay.includes(term));
+      })
       .sort((a, b) => a.year - b.year || a.title.localeCompare(b.title))
-      .slice(0, 120);
-  }, [catalog.films, query]);
+      .slice(0, 80);
+  }, [catalog.films, catalog.id, query]);
 
   const openFilm = (film: Film) => {
     setActive(film);
@@ -632,16 +675,16 @@ export function CatalogScreen({ catalog, onNeedMore }: { catalog: Catalog; onNee
   const focusTop = focus[focus.length - 1] ?? null;
   const searchingNow = query.trim().length >= 2;
   const viewFilms = useMemo(
-    () => (current?.mode === "grid" ? filmsFrom(current.filmIds ?? [], catalog.films) : []),
+    () => (current?.mode === "grid" ? filmsFrom(current.filmIds ?? [], catalog.films, catalog.id) : []),
     [current, catalog.films],
   );
-  const focusFilms = useMemo(() => (focusTop ? filmsFrom(focusTop.filmIds, catalog.films) : []), [focusTop, catalog.films]);
+  const focusFilms = useMemo(() => (focusTop ? filmsFrom(focusTop.filmIds, catalog.films, catalog.id) : []), [focusTop, catalog.films, catalog.id]);
   const yearShelves = useMemo(() => {
     const classics: Film[] = [];
     const byYear = new Map<number, Film[]>();
     const undated: Film[] = [];
     for (const film of Object.values(catalog.films)) {
-      if (!playable(film)) continue;
+      if (!listed(film, catalog.id)) continue;
       if (film.year >= 1980 && film.year <= 1999) classics.push(film);
       else if (film.year >= 1900) {
         const list = byYear.get(film.year);
@@ -707,6 +750,7 @@ export function CatalogScreen({ catalog, onNeedMore }: { catalog: Catalog; onNee
             </Link>
           ))}
         </nav>
+        <SiteSearch discipline={catalog.id} query={query} onQuery={setQuery} />
         <nav className={menu ? "nav-links is-open" : "nav-links"} aria-label="Menu">
           <button type="button" className="nav-link" onClick={() => go("home")}>
             Home
@@ -765,7 +809,7 @@ export function CatalogScreen({ catalog, onNeedMore }: { catalog: Catalog; onNee
               <>
                 <ShelfRow title={focusTop.title} hideHead films={focusFilms} total={focusFilms.length} shape={catalog.shape} onOpen={openFilm} />
                 {focusTop.shelves.map((shelf) => {
-                  const shown = filmsFrom(shelf.previewIds?.length ? shelf.previewIds : shelf.filmIds, catalog.films);
+                  const shown = filmsFrom(shelf.previewIds?.length ? shelf.previewIds : shelf.filmIds, catalog.films, catalog.id);
                   return (
                     <ShelfRow
                       key={shelf.id}
@@ -806,7 +850,7 @@ export function CatalogScreen({ catalog, onNeedMore }: { catalog: Catalog; onNee
                       title={shelf.title}
                       note={shelf.note}
                       total={shelf.filmIds.length}
-                      films={filmsFrom(shown, catalog.films)}
+                      films={filmsFrom(shown, catalog.films, catalog.id)}
                       shape={catalog.shape}
                       onOpen={openFilm}
                       onTitle={shelf.filmIds.length > shown.length || shelf.shelves?.length ? () => openShelf(shelf) : undefined}

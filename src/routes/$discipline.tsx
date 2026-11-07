@@ -1,4 +1,4 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound, Outlet, useMatch } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { CatalogScreen } from "@/components/catalog";
 import type { Catalog } from "@/data/types";
@@ -30,11 +30,15 @@ export const Route = createFileRoute("/$discipline")({
   beforeLoad: ({ params }) => {
     if (!PAGES[params.discipline]) throw notFound();
   },
+  loaderDeps: () => ({}),
   loader: ({ params }) => loadSectionShell({ data: params.discipline }),
-  head: ({ params }) => {
+  head: ({ params, loaderData }) => {
     const page = PAGES[params.discipline];
     if (!page) return { meta: [{ title: "Not found — Trick Machina" }] };
-    return pageHead(page.title, page.description, `/${params.discipline}`);
+    const head = pageHead(page.title, page.description, `/${params.discipline}`);
+    const hero = loaderData?.films[loaderData.featuredId] ?? loaderData?.films[loaderData.heroIds[0] ?? ""];
+    if (!hero?.thumb) return head;
+    return { ...head, links: [...head.links, { rel: "preload", href: hero.thumb, as: "image" }] } as typeof head;
   },
   component: DisciplinePage,
   notFoundComponent: NotFound,
@@ -52,7 +56,15 @@ function NotFound() {
 }
 
 function DisciplinePage() {
+  const filmMatch = useMatch({ from: "/$discipline/$film", shouldThrow: false });
+  if (filmMatch) return <Outlet />;
+  return <DisciplineCatalog />;
+}
+
+function DisciplineCatalog() {
   const { discipline } = Route.useParams();
+  const search = Route.useSearch() as { q?: string };
+  const q = typeof search.q === "string" ? search.q.slice(0, 80) : "";
   const shell = Route.useLoaderData();
   const [catalog, setCatalog] = useState<Catalog>(shell);
   const [failed, setFailed] = useState(false);
@@ -112,5 +124,5 @@ function DisciplinePage() {
       </main>
     );
   }
-  return <CatalogScreen catalog={catalog} onNeedMore={discipline === "bmx" && !ready ? loadFull : undefined} />;
+  return <CatalogScreen catalog={catalog} initialQuery={q} onNeedMore={discipline === "bmx" && !ready ? loadFull : undefined} />;
 }

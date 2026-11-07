@@ -165,6 +165,14 @@ to{opacity:1;translate:0}
 @keyframes slide-down{from{transform:translateY(-14vh)}to{transform:none}}
 .disc-menu{position:relative;z-index:4;flex:1;min-width:0;align-items:center;justify-content:space-between;gap:.4rem;display:flex}
 .disc-link{position:relative;z-index:4;flex:1 1 0;min-width:0;min-height:2.75rem;opacity:.4;align-items:center;justify-content:center;display:flex}
+.site-search{display:flex;gap:.4rem;align-items:center;width:100%;margin-top:.15rem}
+.site-search input,.site-search select{min-height:2.5rem;color:var(--color-fg);background:#111;border:1px solid var(--color-line);font:inherit;font-size:.85rem}
+.site-search input{flex:1;min-width:0;padding:0 .7rem}
+.site-search select{flex:none;padding:0 .45rem}
+.site-search input:focus-visible,.site-search select:focus-visible{outline:2px solid var(--color-accent);outline-offset:1px}
+.film-page{max-width:52rem}
+.film-poster{width:100%;max-height:24rem;object-fit:cover;display:block;background:#000}
+.page-back{color:inherit;text-decoration:none}
 .disc-link[aria-current=page]{opacity:1}
 .disc-link img{height:2.2rem;width:100%;max-width:9rem;object-fit:contain;display:block}
 .disc-link[aria-label="Skate"] img{max-width:12rem}
@@ -217,7 +225,7 @@ to{opacity:1;translate:0}
 .shelf-arrow.next{right:.4rem}
 @media (hover:hover) and (width>=800px){.shelf-scroller:hover .shelf-arrow{display:inline-flex}
 }
-.card{width:9.4rem;color:inherit;text-align:left;scroll-snap-align:start;background:0 0;border:0;flex-direction:column;flex:none;gap:.35rem;padding:0;display:flex}
+.card{width:9.4rem;color:inherit;text-align:left;text-decoration:none;scroll-snap-align:start;background:0 0;border:0;flex-direction:column;flex:none;gap:.35rem;padding:0;display:flex}
 .card-wide{width:16.5rem}
 .card-art{aspect-ratio:2/3;background:var(--color-bg-raise);border:1px solid var(--color-line);display:block;position:relative;overflow:hidden}
 .card-wide .card-art{aspect-ratio:16/9}
