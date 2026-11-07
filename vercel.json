@@ -1,5 +1,5 @@
 {
-  "regions": ["fra1"],
+  "crons": [{ "path": "/api/cron/embeds", "schedule": "0 6 * * 1" }],
   "redirects": [
     {
       "source": "/:path*",
