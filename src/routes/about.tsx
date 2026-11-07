@@ -14,7 +14,7 @@ export const Route = createFileRoute("/about")({
 });
 
 const STATS = [
-  { id: "skate", name: "Skateboarding", films: 1992, playable: 1992, years: "1980–2026", note: "From Animal Chin to today" },
+  { id: "skate", name: "Skateboarding", films: 1990, playable: 1990, years: "1980–2026", note: "From Animal Chin to today" },
   { id: "bmx", name: "BMX", films: 20887, playable: 20887, years: "1985–2026", note: "Parts, brands, contests, scenes" },
   { id: "blades", name: "Blades", films: 636, playable: 636, years: "1923–2026", note: "Aggressive inline reels" },
   { id: "scoot", name: "Scoot", films: 1773, playable: 1773, years: "2013–2026", note: "Street scooter full lengths" },
@@ -22,8 +22,8 @@ const STATS = [
 
 function About() {
   const router = useRouter();
-  const total = 25288;
-  const playable = 25288;
+  const total = 25286;
+  const playable = 25286;
 
   return (
     <main className="cookies about">
