@@ -84,30 +84,21 @@ function DisciplinePage() {
     if (ready) return;
     const controller = new AbortController();
     let dead = false;
-    let started = false;
-    const load = () => {
-      if (dead || started) return;
-      started = true;
-      fetch(`/catalogs/${discipline}.json`, { signal: controller.signal })
-        .then((response) => {
-          if (!response.ok) throw new Error("missing");
-          return response.json() as Promise<Catalog>;
-        })
-        .then((data) => {
-          if (!dead && data.id === discipline) setCatalog(data);
-        })
-        .catch((err: unknown) => {
-          if (dead || (err instanceof DOMException && err.name === "AbortError")) return;
-          setFailed(true);
-        });
-    };
-    const idleId = "requestIdleCallback" in window ? window.requestIdleCallback(load, { timeout: 400 }) : 0;
-    const timer = window.setTimeout(load, idleId ? 1200 : 40);
+    fetch(`/catalogs/${discipline}.json`, { signal: controller.signal })
+      .then((response) => {
+        if (!response.ok) throw new Error("missing");
+        return response.json() as Promise<Catalog>;
+      })
+      .then((data) => {
+        if (!dead && data.id === discipline) setCatalog(data);
+      })
+      .catch((err: unknown) => {
+        if (dead || (err instanceof DOMException && err.name === "AbortError")) return;
+        setFailed(true);
+      });
     return () => {
       dead = true;
       controller.abort();
-      window.clearTimeout(timer);
-      if (idleId) window.cancelIdleCallback(idleId);
     };
   }, [discipline, ready]);
 

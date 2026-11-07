@@ -674,7 +674,7 @@ export function CatalogScreen({ catalog, onNeedMore }: { catalog: Catalog; onNee
             <Menu aria-hidden="true" />
           </button>
           <h1 className="brand-line">
-            <img src="/media/wordmark-line.webp" alt="Street Sports Archives" />
+            <img src="/media/wordmark-line-sm.webp" alt="Street Sports Archives" />
           </h1>
         </div>
         <nav className="disc-menu" aria-label="Disciplines">
@@ -694,7 +694,16 @@ export function CatalogScreen({ catalog, onNeedMore }: { catalog: Catalog; onNee
               aria-current={catalog.id === id ? "page" : undefined}
               aria-label={label}
             >
-              <img src={id === "skate" ? "/media/head-skate-mark4.webp" : id === "bmx" ? "/media/head-bmx-fat4.webp" : `/media/head-${id}-red.webp`} alt="" />
+              <img
+                src={
+                  id === "skate"
+                    ? "/media/head-skate-sm.webp"
+                    : id === "bmx"
+                      ? "/media/head-bmx-sm.webp"
+                      : `/media/head-${id}-sm.webp`
+                }
+                alt=""
+              />
             </Link>
           ))}
         </nav>
