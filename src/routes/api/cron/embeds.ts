@@ -1,4 +1,5 @@
 import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 import { createFileRoute } from "@tanstack/react-router";
 
 const DISCIPLINES = ["skate", "bmx", "blades", "scoot"] as const;
@@ -15,7 +16,8 @@ export const Route = createFileRoute("/api/cron/embeds")({
         const week = Math.floor(Date.now() / (7 * 24 * 60 * 60 * 1000));
         const batch: { discipline: string; id: string; title: string; company: string; year: number; videoId: string }[] = [];
         for (const discipline of DISCIPLINES) {
-          const raw = await readFile(new URL(`../../../../public/catalogs/${discipline}.json`, import.meta.url), "utf8");
+          const file = join(process.cwd(), "public", "catalogs", `${discipline}.json`);
+          const raw = await readFile(file, "utf8");
           const catalog = JSON.parse(raw) as { films: Record<string, { id: string; title: string; company: string; year: number; watch: { host: string; id?: string; parts?: { id: string }[] } }> };
           for (const film of Object.values(catalog.films)) {
             const videoId = film.watch.host === "youtube" ? film.watch.id : film.watch.host === "parts" ? film.watch.parts?.[0]?.id : "";
