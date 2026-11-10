@@ -53,16 +53,21 @@
   body {
     margin: 0;
     min-height: 100dvh;
-    background-color: #000;
-    background-image: linear-gradient(rgb(0 0 0 / 68%), rgb(0 0 0 / 68%)), url(/media/disciplines-lite.webp);
-    background-position: center, center 40%;
-    background-size: cover;
-    background-attachment: fixed;
+    background: #000;
     color: var(--color-fg);
     font-family: var(--font-sans);
     font-weight: 300;
     -webkit-font-smoothing: antialiased;
     overscroll-behavior-y: none;
+  }
+  body:before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: url(/media/disciplines-lite.webp) center 40% / cover no-repeat;
+    opacity: .32;
+    pointer-events: none;
+    z-index: 0;
   }
   a {
     color: inherit;
@@ -70,7 +75,7 @@
 }
 
 /* restored app styles */
-.stage{background:#000;height:100dvh;position:relative;overflow:hidden}
+.stage{background:#000;height:100dvh;position:relative;z-index:1;overflow:hidden}
 .stage:before{content:"";position:absolute;inset:0;background:url(/media/landing.webp) 50% 42%/cover no-repeat;opacity:.5;pointer-events:none}
 .stack{z-index:1;height:100dvh;position:relative}
 .floor{z-index:2;flex-direction:column;align-items:center;gap:1.1rem;width:min(100%,48rem);padding:0 .75rem;display:flex;position:absolute;top:50%;left:50%;translate:-50% -50%}
@@ -157,10 +162,10 @@ to{opacity:1;translate:0}
 .stack[data-ready=true] .label,.stack[data-ready=true] .soon,.stack[data-ready=true] .archive-title,.stack[data-ready=true] .archive-line,.stack[data-ready=true] .archive-counts{opacity:1;filter:none;animation:none;translate:0}
 .cat:hover .label,.cat:focus-visible .label{translate:0}
 }
-.catalog{--color-accent:#f3eadc;background:#000;min-height:100dvh;color:var(--color-fg);overflow-x:hidden;animation:slide-down .55s cubic-bezier(.16,.84,.32,1);isolation:isolate}
-.catalog-art{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 40%;opacity:.32;pointer-events:none;z-index:-1}
-.catalog[data-id=bmx]{--color-accent:#c8f5d4;background:radial-gradient(120% 40rem at 50% -10rem,#123028 0%,#0000 55%),#07110e}
-.catalog[data-id=blades]{--color-accent:#d5e7f6;background:radial-gradient(120% 40rem at 50% -10rem,#1a2733 0%,#0000 55%),#0b1014}
+.catalog{--color-accent:#f3eadc;background:transparent;position:relative;z-index:1;min-height:100dvh;color:var(--color-fg);overflow-x:hidden;animation:slide-down .55s cubic-bezier(.16,.84,.32,1)}
+.catalog-art{display:none}
+.catalog[data-id=bmx]{--color-accent:#c8f5d4;background:radial-gradient(120% 40rem at 50% -10rem,#123028 0%,#0000 55%)}
+.catalog[data-id=blades]{--color-accent:#d5e7f6;background:radial-gradient(120% 40rem at 50% -10rem,#1a2733 0%,#0000 55%)}
 .topnav{z-index:20;background:#000000b8;align-items:stretch;flex-direction:column;gap:.2rem;min-height:4.25rem;max-width:100%;padding:.4rem max(1rem, env(safe-area-inset-right)) .45rem max(1.1rem, env(safe-area-inset-left));display:flex;position:sticky;top:0}
 .brand-wrap{position:relative;z-index:1;align-items:center;justify-content:center;min-height:2.75rem;display:flex}
 .brand-wrap .menu-btn{position:absolute;left:0;top:50%;translate:0 -50%;z-index:3}
