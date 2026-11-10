@@ -182,7 +182,6 @@ to{opacity:1;translate:0}
 .disc-link img{height:2.2rem;width:100%;max-width:9rem;object-fit:contain;display:block}
 .disc-link[aria-label="Skate"] img{max-width:12rem}
 .disc-link[aria-current=page]{opacity:1}
-.disc-link[aria-current=page] img{filter:brightness(1.55) saturate(1.7) contrast(1.08)}
 @media (width<=640px){.disc-link img{height:1.55rem}
 .topnav{padding-left:max(.15rem,env(safe-area-inset-left))}
 .brand-wrap .menu-btn{left:-.45rem}}

@@ -717,7 +717,7 @@ export function CatalogScreen({ catalog, onNeedMore, initialQuery = "" }: { cata
             <Menu aria-hidden="true" />
           </button>
           <h1 className="brand-line">
-            <img src="/media/wordmark-line-sm.webp" alt="Street Sports Archives" />
+            <img src="/media/wordmark-line-green.webp" alt="Street Sports Archives" />
           </h1>
         </div>
         <nav className="disc-menu" aria-label="Disciplines">
@@ -740,10 +740,10 @@ export function CatalogScreen({ catalog, onNeedMore, initialQuery = "" }: { cata
               <img
                 src={
                   id === "skate"
-                    ? "/media/head-skate-sm.webp"
+                    ? "/media/head-skate-green.webp"
                     : id === "bmx"
-                      ? "/media/head-bmx-sm.webp"
-                      : `/media/head-${id}-sm.webp`
+                      ? "/media/head-bmx-green.webp"
+                      : `/media/head-${id}-green.webp`
                 }
                 alt=""
               />
