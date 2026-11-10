@@ -719,7 +719,7 @@ export function CatalogScreen({ catalog, onNeedMore, initialQuery = "" }: { cata
           <div className="brand-stack">
             <img className="brand-mark" src="/media/trick-machina-foot.webp" alt="Trick Machina" />
             <h1 className="brand-line">
-              <img src="/media/wordmark-line-green.webp" alt="Street Sports Archives" />
+              <img src="/media/wordmark-line-grad.webp" alt="Street Sports Archives" />
             </h1>
           </div>
         </div>
