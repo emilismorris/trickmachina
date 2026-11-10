@@ -48,7 +48,7 @@ function SiteFooter() {
   if (path.startsWith("/admin") || path.startsWith("/login")) return null;
   return (
     <footer className="site-foot">
-      <img src="/media/trick-machina-grad.webp" alt="Trick Machina" />
+      <img src="/media/trick-machina-h.webp" alt="Trick Machina" />
     </footer>
   );
 }
