@@ -758,17 +758,17 @@ export function CatalogScreen({ catalog, onNeedMore, initialQuery = "" }: { cata
           <button type="button" className="nav-link nav-home" onClick={() => go("home")} aria-label="Home">
             <img src="/media/nav-home.webp" alt="" />
           </button>
-          <Link to="/about" className="nav-link" onClick={() => setMenu(false)}>
-            About
+          <Link to="/about" className="nav-link nav-logo" aria-label="About" onClick={() => setMenu(false)}>
+            <img src="/media/nav-about.webp" alt="" />
           </Link>
           <Link to="/contact" className="nav-link" onClick={() => setMenu(false)}>
             Contacts
           </Link>
-          <Link to="/cookies" className="nav-link" onClick={() => setMenu(false)}>
-            Cookies
+          <Link to="/cookies" className="nav-link nav-logo" aria-label="Cookies" onClick={() => setMenu(false)}>
+            <img src="/media/nav-cookies.webp" alt="" />
           </Link>
-          <Link to="/account" className="nav-link" onClick={() => setMenu(false)}>
-            {saved.signedIn ? "Account" : "Log in"}
+          <Link to="/account" className={saved.signedIn ? "nav-link" : "nav-link nav-logo"} aria-label={saved.signedIn ? "Account" : "Log in"} onClick={() => setMenu(false)}>
+            {saved.signedIn ? "Account" : <img src="/media/nav-login.webp" alt="" />}
           </Link>
         </nav>
       </header>
