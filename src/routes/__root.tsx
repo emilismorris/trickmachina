@@ -49,7 +49,7 @@ function SiteFooter() {
   return (
     <footer className="site-foot">
       <img className="foot-archive" src="/media/foot-archive.webp" alt="Archive" />
-      <img src="/media/trick-machina-green.webp" alt="Trick Machina" />
+      <img src="/media/trick-machina-logo.webp" alt="Trick Machina" />
     </footer>
   );
 }
