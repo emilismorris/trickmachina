@@ -1,5 +1,4 @@
 import { useNavigate } from "@tanstack/react-router";
-import { Search } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
 
 export function SiteSearch({
@@ -81,9 +80,6 @@ export function SiteSearch({
           }
         }}
       />
-      <button type="submit" className="search-go" aria-label="Search">
-        <Search aria-hidden="true" />
-      </button>
     </form>
   );
 }
