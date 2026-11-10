@@ -762,20 +762,17 @@ export function CatalogScreen({ catalog, onNeedMore, initialQuery = "" }: { cata
         </nav>
         <SiteSearch discipline={catalog.id} query={query} onQuery={setQuery} />
         <nav className={menu ? "nav-links is-open" : "nav-links"} aria-label="Menu">
-          <button type="button" className="nav-link nav-home" onClick={() => go("home")} aria-label="Home">
-            <img src="/media/nav-home-bw.webp" alt="" />
-          </button>
           <Link to="/about" className="nav-link nav-logo" aria-label="About" onClick={() => setMenu(false)}>
-            <img src="/media/nav-about-bw.webp" alt="" />
+            <img src="/media/nav-about-green.webp" alt="" />
           </Link>
           <Link to="/contact" className="nav-link nav-logo" aria-label="Contacts" onClick={() => setMenu(false)}>
-            <img src="/media/nav-contact-bw.webp" alt="" />
+            <img src="/media/nav-contact-green.webp" alt="" />
           </Link>
           <Link to="/cookies" className="nav-link nav-logo" aria-label="Cookies" onClick={() => setMenu(false)}>
-            <img src="/media/nav-cookies-plain.webp" alt="" />
+            <img src="/media/nav-cookies-green.webp" alt="" />
           </Link>
           <Link to="/account" className="nav-link nav-logo" aria-label={saved.signedIn ? "Account" : "Log in"} onClick={() => setMenu(false)}>
-            <img src={saved.signedIn ? "/media/nav-account-bw.webp" : "/media/nav-login-bw3.webp"} alt="" />
+            <img src={saved.signedIn ? "/media/nav-account-green.webp" : "/media/nav-login-green.webp"} alt="" />
           </Link>
         </nav>
       </header>
