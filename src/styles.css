@@ -65,7 +65,7 @@
     content: "";
     position: absolute;
     inset: 0;
-    background: url(/media/app-art.webp) top center / 100% auto repeat-y;
+    background: url(/media/app-art-2.webp) top center / 100% auto repeat-y;
     opacity: .32;
     pointer-events: none;
     z-index: 0;
