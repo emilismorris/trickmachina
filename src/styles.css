@@ -193,7 +193,7 @@ to{opacity:1;translate:0}
 .nav-links.is-open{display:flex}
 .nav-link{min-height:2.75rem;color:var(--color-muted);font:inherit;letter-spacing:.08em;text-transform:uppercase;background:0 0;border:0;flex:none;padding:0 .7rem;font-size:.78rem;text-decoration:none;display:inline-flex;align-items:center;text-align:left;justify-content:flex-start}
 .nav-home,.nav-logo{justify-content:flex-start;min-height:0;padding:.2rem 0 .2rem .45rem}
-.nav-home img,.nav-logo img{width:5.6rem;height:1.55rem;object-fit:contain;object-position:left center;display:block}
+.nav-home img,.nav-logo img{width:8.4rem;height:2.35rem;object-fit:contain;object-position:left center;display:block}
 .menu-btn,.exit-btn{display:inline-flex;flex:none}
 .nav-tools{flex:none;align-items:center;min-width:0;display:flex}
 .nav-tools.is-search{flex:1}

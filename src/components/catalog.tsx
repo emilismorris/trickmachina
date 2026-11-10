@@ -775,7 +775,7 @@ export function CatalogScreen({ catalog, onNeedMore, initialQuery = "" }: { cata
             <img src="/media/nav-cookies-4.webp" alt="" />
           </Link>
           <Link to="/account" className="nav-link nav-logo" aria-label={saved.signedIn ? "Account" : "Log in"} onClick={() => setMenu(false)}>
-            <img src={saved.signedIn ? "/media/nav-account-2.webp" : "/media/nav-login-4.webp"} alt="" />
+            <img src={saved.signedIn ? "/media/nav-account-2.webp" : "/media/nav-login-red.webp"} alt="" />
           </Link>
         </nav>
       </header>
