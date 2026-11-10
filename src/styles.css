@@ -113,7 +113,7 @@ to{opacity:1;translate:0}
 .consent p{margin:0;font-size:.9rem;line-height:1.4}
 .consent-actions{display:flex;gap:.45rem;align-items:center}
 .consent-actions button,.consent-actions a{min-height:2.4rem;padding:0 .7rem;font:inherit;color:var(--color-fg);background:transparent;border:1px solid var(--color-line);text-decoration:none;display:inline-flex;align-items:center}
-.cookies{background:#000;color:#fff;min-height:100dvh;padding:2rem 1.1rem 4rem}
+.cookies{background:#000;color:#fff;min-height:100dvh;padding:2rem 1.1rem 4rem;position:relative;z-index:1}
 .page-back{color:#fff;gap:.25rem;letter-spacing:.08em;text-transform:uppercase;text-decoration:none;font:inherit;font-size:.78rem;background:0 0;border:0;padding:0;align-items:center;display:inline-flex;cursor:pointer}
 .page-back svg{width:1.15rem;height:1.15rem}
 .cookies h1{letter-spacing:.14em;text-transform:uppercase;font-size:1.35rem;font-weight:300}
@@ -188,8 +188,8 @@ to{opacity:1;translate:0}
 .site-search input:focus-visible{outline:2px solid var(--color-accent);outline-offset:1px}
 .search-go{flex:none;width:2.5rem;height:2.5rem;color:#fff;background:#111;border:1px solid var(--color-line);justify-content:center;align-items:center;display:inline-flex}
 .search-go svg{width:1.15rem;height:1.15rem}
-.film-page{max-width:52rem}
-.film-poster{width:100%;max-height:24rem;object-fit:cover;display:block;background:#000}
+.film-page{max-width:52rem;background:#000;opacity:1}
+.film-poster{width:100%;max-height:24rem;object-fit:cover;display:block;background:#000;opacity:1}
 .page-back{color:inherit;text-decoration:none}
 @media (width>=861px){
   body:before{background-size:100% 2100px;background-repeat:repeat-y;background-position:top center}
