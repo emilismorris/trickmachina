@@ -188,7 +188,7 @@ to{opacity:1;translate:0}
 .site-search input:focus-visible{outline:2px solid var(--color-accent);outline-offset:1px}
 .search-go{flex:none;width:2.5rem;height:2.5rem;color:#fff;background:#111;border:1px solid var(--color-line);justify-content:center;align-items:center;display:inline-flex}
 .search-go svg{width:1.15rem;height:1.15rem}
-.film-page{max-width:52rem;background:#000;opacity:1}
+.film-page{max-width:none;width:100%;background:transparent;opacity:1}
 .film-poster{width:100%;max-height:24rem;object-fit:cover;display:block;background:#000;opacity:1}
 .page-back{color:inherit;text-decoration:none}
 @media (width>=861px){
