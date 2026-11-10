@@ -368,7 +368,13 @@ function ShelfRow({
   };
   const heading = (
     <>
-      <h2>{title}</h2>
+      {title === "Classics" ? (
+        <h2 className="shelf-logo">
+          <img src="/media/classics.webp" alt="Classics" />
+        </h2>
+      ) : (
+        <h2>{title}</h2>
+      )}
       {typeof total === "number" ? <span className="shelf-count">{total.toLocaleString("en-US")}</span> : null}
       {onTitle ? <span>See all</span> : null}
     </>
@@ -800,7 +806,7 @@ export function CatalogScreen({ catalog, onNeedMore, initialQuery = "" }: { cata
             >
               Back
             </button>
-            <h1>{focusTop.title}</h1>
+            <h1>{focusTop.title === "Classics" ? <img className="page-mark" src="/media/classics.webp" alt="Classics" /> : focusTop.title}</h1>
             <p>
               {focusTop.parent ? `${focusTop.parent} · ` : ""}
               {(focusFilms.length + (focusTop.shelves?.reduce((sum, shelf) => sum + shelf.filmIds.length, 0) ?? 0)).toLocaleString("en-US")} films
@@ -835,7 +841,7 @@ export function CatalogScreen({ catalog, onNeedMore, initialQuery = "" }: { cata
       ) : current ? (
         <main className="shelf-page">
           <div className="browse-head">
-            <h1>{current.title}</h1>
+            <h1>{current.title === "Classics" ? <img className="page-mark" src="/media/classics.webp" alt="Classics" /> : current.title}</h1>
             <p>
               {(current.mode === "grid" ? current.filmIds?.length ?? 0 : current.shelves?.reduce((sum, shelf) => sum + shelf.filmIds.length, 0) ?? 0).toLocaleString("en-US")} films
               {current.note ? ` · ${current.note}` : ""}

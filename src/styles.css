@@ -225,6 +225,9 @@ to{opacity:1;translate:0}
 .shelf{content-visibility:auto;contain-intrinsic-size:auto 220px}
 .shelf-title{min-height:2.75rem;color:inherit;font:inherit;background:0 0;border:0;align-items:baseline;gap:.7rem;padding:0;display:inline-flex}
 .shelf-title h2{letter-spacing:.04em;margin:0;font-size:1.15rem;font-weight:500}
+.shelf-logo{display:flex;align-items:center}
+.shelf-logo img,.page-mark{height:2.35rem;width:auto;display:block}
+.browse-head .page-mark{height:auto;width:min(78vw,18rem)}
 .shelf-count,.shelf-title span{color:var(--color-muted);letter-spacing:.12em;text-transform:uppercase;font-size:.72rem}
 .shelf-head p{color:var(--color-muted);margin:0;font-size:.82rem}
 .shelf-scroller{position:relative}
