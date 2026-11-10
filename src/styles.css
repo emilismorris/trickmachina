@@ -67,8 +67,8 @@
     top: 0;
     left: 0;
     width: 100%;
-    aspect-ratio: 648 / 2000;
-    background: url(/media/app-art.webp) top center / 100% 100% no-repeat;
+    height: 100%;
+    background: url(/media/app-art.webp) top center / 100% auto repeat-y;
     opacity: .32;
     pointer-events: none;
     z-index: 0;
