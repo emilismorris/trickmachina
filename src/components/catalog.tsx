@@ -761,8 +761,8 @@ export function CatalogScreen({ catalog, onNeedMore, initialQuery = "" }: { cata
           <Link to="/about" className="nav-link nav-logo" aria-label="About" onClick={() => setMenu(false)}>
             <img src="/media/nav-about-2.webp" alt="" />
           </Link>
-          <Link to="/contact" className="nav-link" onClick={() => setMenu(false)}>
-            Contacts
+          <Link to="/contact" className="nav-link nav-logo" aria-label="Contacts" onClick={() => setMenu(false)}>
+            <img src="/media/nav-contact.webp" alt="" />
           </Link>
           <Link to="/cookies" className="nav-link nav-logo" aria-label="Cookies" onClick={() => setMenu(false)}>
             <img src="/media/nav-cookies-2.webp" alt="" />
