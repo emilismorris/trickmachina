@@ -3,7 +3,6 @@ import { createRootRoute, HeadContent, Link, Outlet, Scripts, useRouterState } f
 import { AuthProvider } from "@/lib/auth/provider";
 import { PreviewHostBridge } from "@/components/preview-host-bridge";
 import { ConsentBanner } from "@/components/consent";
-import { HeyCatchAnalytics } from "@/components/heycatch-analytics";
 import { startAnalytics, trackPage } from "@/lib/ga";
 import { collectVisit, pulsePresence } from "@/lib/visit";
 import appCss from "../styles.css?url";
@@ -32,17 +31,27 @@ export const Route = createRootRoute({
       <body>
         <NoPullRefresh />
         <Analytics />
-        <HeyCatchAnalytics />
         <PreviewHostBridge />
         <ConsentBanner />
         <AuthProvider>
           <Outlet />
+          <SiteFooter />
         </AuthProvider>
         <Scripts />
       </body>
     </html>
   ),
 });
+
+function SiteFooter() {
+  const path = useRouterState({ select: (state) => state.location.pathname });
+  if (path.startsWith("/admin") || path.startsWith("/login")) return null;
+  return (
+    <footer className="site-foot">
+      <img src="/media/trick-machina-foot.webp" alt="Trick Machina" />
+    </footer>
+  );
+}
 
 function Analytics() {
   const href = useRouterState({ select: (state) => state.location.href });
