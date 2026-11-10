@@ -716,9 +716,12 @@ export function CatalogScreen({ catalog, onNeedMore, initialQuery = "" }: { cata
           <button type="button" className="icon-btn menu-btn" aria-label={menu ? "Close menu" : "Open menu"} aria-expanded={menu} onClick={() => setMenu((open) => !open)}>
             <Menu aria-hidden="true" />
           </button>
-          <h1 className="brand-line">
-            <img src="/media/wordmark-line-green.webp" alt="Street Sports Archives" />
-          </h1>
+          <div className="brand-stack">
+            <img className="brand-mark" src="/media/trick-machina-foot.webp" alt="Trick Machina" />
+            <h1 className="brand-line">
+              <img src="/media/wordmark-line-green.webp" alt="Street Sports Archives" />
+            </h1>
+          </div>
         </div>
         <nav className="disc-menu" aria-label="Disciplines">
           {(
