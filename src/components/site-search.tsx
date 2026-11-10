@@ -1,12 +1,6 @@
 import { useNavigate } from "@tanstack/react-router";
+import { Search } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
-
-const DISCS = [
-  ["skate", "Skate"],
-  ["bmx", "BMX"],
-  ["blades", "Blades"],
-  ["scoot", "Scoot"],
-] as const;
 
 export function SiteSearch({
   discipline = "skate",
@@ -21,15 +15,10 @@ export function SiteSearch({
   const fieldId = useId();
   const input = useRef<HTMLInputElement>(null);
   const [text, setText] = useState(query);
-  const [disc, setDisc] = useState(discipline);
 
   useEffect(() => {
     setText(query);
   }, [query]);
-
-  useEffect(() => {
-    setDisc(discipline);
-  }, [discipline]);
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -44,14 +33,14 @@ export function SiteSearch({
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  const go = (nextDisc: string, nextText: string) => {
-    if (onQuery && nextDisc === discipline) {
+  const go = (nextText: string) => {
+    if (onQuery) {
       onQuery(nextText);
       return;
     }
     void navigate({
       to: "/$discipline",
-      params: { discipline: nextDisc },
+      params: { discipline },
       search: { q: nextText } as never,
     });
   };
@@ -62,7 +51,7 @@ export function SiteSearch({
       role="search"
       onSubmit={(event) => {
         event.preventDefault();
-        go(disc, text.trim());
+        go(text.trim());
         input.current?.focus();
       }}
     >
@@ -82,7 +71,7 @@ export function SiteSearch({
         onChange={(event) => {
           const next = event.target.value;
           setText(next);
-          if (onQuery && disc === discipline) onQuery(next);
+          if (onQuery) onQuery(next);
         }}
         onKeyDown={(event) => {
           if (event.key === "Escape") {
@@ -92,24 +81,9 @@ export function SiteSearch({
           }
         }}
       />
-      <label className="sr-only" htmlFor={`${fieldId}-disc`}>
-        Discipline
-      </label>
-      <select
-        id={`${fieldId}-disc`}
-        value={disc}
-        onChange={(event) => {
-          const next = event.target.value;
-          setDisc(next);
-          go(next, text.trim());
-        }}
-      >
-        {DISCS.map(([id, label]) => (
-          <option key={id} value={id}>
-            {label}
-          </option>
-        ))}
-      </select>
+      <button type="submit" className="search-go" aria-label="Search">
+        <Search aria-hidden="true" />
+      </button>
     </form>
   );
 }

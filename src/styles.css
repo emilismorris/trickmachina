@@ -171,10 +171,11 @@ to{opacity:1;translate:0}
 .disc-menu{position:relative;z-index:4;flex:1;min-width:0;align-items:center;justify-content:space-between;gap:.4rem;display:flex}
 .disc-link{position:relative;z-index:4;flex:1 1 0;min-width:0;min-height:2.75rem;opacity:.4;align-items:center;justify-content:center;display:flex}
 .site-search{display:flex;gap:.4rem;align-items:center;width:100%;margin-top:.15rem}
-.site-search input,.site-search select{min-height:2.5rem;color:var(--color-fg);background:#111;border:1px solid var(--color-line);font:inherit;font-size:.85rem}
+.site-search input{min-height:2.5rem;color:var(--color-fg);background:#111;border:1px solid var(--color-line);font:inherit;font-size:.85rem}
 .site-search input{flex:1;min-width:0;padding:0 .7rem}
-.site-search select{flex:none;padding:0 .45rem}
-.site-search input:focus-visible,.site-search select:focus-visible{outline:2px solid var(--color-accent);outline-offset:1px}
+.site-search input:focus-visible{outline:2px solid var(--color-accent);outline-offset:1px}
+.search-go{flex:none;width:2.5rem;height:2.5rem;color:#fff;background:#111;border:1px solid var(--color-line);justify-content:center;align-items:center;display:inline-flex}
+.search-go svg{width:1.15rem;height:1.15rem}
 .film-page{max-width:52rem}
 .film-poster{width:100%;max-height:24rem;object-fit:cover;display:block;background:#000}
 .page-back{color:inherit;text-decoration:none}
