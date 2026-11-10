@@ -153,16 +153,16 @@ to{opacity:1;translate:0}
 .catalog-art{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 40%;opacity:.32;pointer-events:none;z-index:-1}
 .catalog[data-id=bmx]{--color-accent:#c8f5d4;background:radial-gradient(120% 40rem at 50% -10rem,#123028 0%,#0000 55%),#07110e}
 .catalog[data-id=blades]{--color-accent:#d5e7f6;background:radial-gradient(120% 40rem at 50% -10rem,#1a2733 0%,#0000 55%),#0b1014}
-.topnav{z-index:20;background:#000000f2;align-items:stretch;flex-direction:column;gap:.2rem;min-height:4.25rem;max-width:100%;padding:.4rem max(1rem, env(safe-area-inset-right)) .45rem max(1.1rem, env(safe-area-inset-left));display:flex;position:sticky;top:0}
+.topnav{z-index:20;background:#000000b8;align-items:stretch;flex-direction:column;gap:.2rem;min-height:4.25rem;max-width:100%;padding:.4rem max(1rem, env(safe-area-inset-right)) .45rem max(1.1rem, env(safe-area-inset-left));display:flex;position:sticky;top:0}
 .brand-wrap{position:relative;z-index:1;align-items:center;justify-content:center;min-height:2.75rem;display:flex}
 .brand-wrap .menu-btn{position:absolute;left:0;top:50%;translate:0 -50%;z-index:3}
 .brand-stack{width:min(78vw,26rem);margin-left:1.5rem;align-items:center;gap:.05rem;display:flex;flex-direction:column;pointer-events:none}
 .brand-mark{width:100%;height:auto;display:block}
 .brand-line{width:58%;margin:0;display:block}
 .brand-line img{width:100%;height:auto;display:block}
-.topnav.is-solid{border-bottom:1px solid var(--color-line);background:#000000f7}
-.catalog[data-id=bmx] .topnav.is-solid{background:#000000f7}
-.catalog[data-id=blades] .topnav.is-solid{background:#000000f7}
+.topnav.is-solid{border-bottom:1px solid var(--color-line);background:#000000c4}
+.catalog[data-id=bmx] .topnav.is-solid{background:#000000c4}
+.catalog[data-id=blades] .topnav.is-solid{background:#000000c4}
 .wordmark{flex:none;align-items:center;display:flex}
 .wordmark img{width:auto;height:1.35rem}
 @keyframes slide-down{from{transform:translateY(-14vh)}to{transform:none}}
