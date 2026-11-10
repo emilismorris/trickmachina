@@ -554,11 +554,12 @@ export function CatalogScreen({ catalog, onNeedMore, initialQuery = "" }: { cata
   }, [catalog.id]);
 
   useEffect(() => {
+    if (query === initialQuery) return;
     const timer = window.setTimeout(() => {
       void navigate({ to: "/$discipline", params: { discipline: catalog.id }, search: { q: query } as never, replace: true });
     }, 300);
     return () => window.clearTimeout(timer);
-  }, [query, catalog.id, navigate]);
+  }, [query, initialQuery, catalog.id, navigate]);
 
   useEffect(() => {
     const node = more.current;

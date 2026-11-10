@@ -1,5 +1,5 @@
 import { createFileRoute, Link, notFound, Outlet, useMatch } from "@tanstack/react-router";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { CatalogScreen } from "@/components/catalog";
 import type { Catalog } from "@/data/types";
 import { isHitKey } from "@/lib/hits";
@@ -68,11 +68,15 @@ function DisciplineCatalog() {
   const shell = Route.useLoaderData();
   const [catalog, setCatalog] = useState<Catalog>(shell);
   const [failed, setFailed] = useState(false);
+  const started = useRef(false);
+  const generation = useRef(0);
   const ready = catalog.id === discipline && Object.keys(catalog.views).length > 0;
 
   useEffect(() => {
     setCatalog(shell);
     setFailed(false);
+    started.current = false;
+    generation.current += 1;
   }, [shell]);
 
   useEffect(() => {
@@ -80,39 +84,35 @@ function DisciplineCatalog() {
   }, [discipline]);
 
   const loadFull = useCallback(() => {
-    if (ready) return;
+    if (ready || started.current) return;
+    started.current = true;
+    const gen = generation.current;
     fetch(`/catalogs/${discipline}.json`)
       .then((response) => {
         if (!response.ok) throw new Error("missing");
         return response.json() as Promise<Catalog>;
       })
       .then((data) => {
+        if (gen !== generation.current) return;
         if (data.id === discipline) setCatalog(data);
       })
-      .catch(() => setFailed(true));
+      .catch(() => {
+        if (gen !== generation.current) return;
+        started.current = false;
+        setFailed(true);
+      });
   }, [discipline, ready]);
 
   useEffect(() => {
     if (ready) return;
-    const controller = new AbortController();
-    let dead = false;
-    fetch(`/catalogs/${discipline}.json`, { signal: controller.signal })
-      .then((response) => {
-        if (!response.ok) throw new Error("missing");
-        return response.json() as Promise<Catalog>;
-      })
-      .then((data) => {
-        if (!dead && data.id === discipline) setCatalog(data);
-      })
-      .catch((err: unknown) => {
-        if (dead || (err instanceof DOMException && err.name === "AbortError")) return;
-        setFailed(true);
-      });
+    const start = () => loadFull();
+    const idle = window.requestIdleCallback?.(start, { timeout: 4000 });
+    const timer = window.setTimeout(start, 3200);
     return () => {
-      dead = true;
-      controller.abort();
+      if (idle) window.cancelIdleCallback?.(idle);
+      window.clearTimeout(timer);
     };
-  }, [discipline, ready]);
+  }, [ready, loadFull]);
 
   if (failed && !catalog.films[catalog.featuredId]) {
     return (
@@ -124,5 +124,5 @@ function DisciplineCatalog() {
       </main>
     );
   }
-  return <CatalogScreen catalog={catalog} initialQuery={q} onNeedMore={discipline === "bmx" && !ready ? loadFull : undefined} />;
+  return <CatalogScreen catalog={catalog} initialQuery={q} onNeedMore={ready ? undefined : loadFull} />;
 }
