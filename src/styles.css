@@ -59,12 +59,16 @@
     font-weight: 300;
     -webkit-font-smoothing: antialiased;
     overscroll-behavior-y: none;
+    position: relative;
   }
   body:before {
     content: "";
-    position: fixed;
-    inset: 0;
-    background: url(/media/disciplines-lite.webp) center 40% / cover no-repeat;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    aspect-ratio: 648 / 2000;
+    background: url(/media/app-art.webp) top center / 100% 100% no-repeat;
     opacity: .32;
     pointer-events: none;
     z-index: 0;
