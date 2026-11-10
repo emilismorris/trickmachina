@@ -50,7 +50,7 @@ function SiteFooter() {
     <footer className="site-foot">
       <img className="foot-street" src="/media/foot-streetsports-4.webp" alt="Streetsports" />
       <img className="foot-archive" src="/media/foot-archive.webp" alt="Archive" />
-      <img src="/media/foot-trick.webp" alt="Trick Machina" />
+      <img src="/media/trick-machina-v.webp" alt="Trick Machina" />
     </footer>
   );
 }
