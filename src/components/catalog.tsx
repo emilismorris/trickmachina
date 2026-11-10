@@ -724,7 +724,7 @@ export function CatalogScreen({ catalog, onNeedMore, initialQuery = "" }: { cata
             <Menu aria-hidden="true" />
           </button>
           <div className="brand-stack">
-            <img className="brand-mark" src="/media/trick-machina-logo2.webp" alt="Trick Machina" />
+            <img className="brand-mark" src="/media/trick-machina-logo3.webp" alt="Trick Machina" />
             <h1 className="brand-line">
               <img src="/media/wordmark-line-grad.webp" alt="Street Sports Archives" />
             </h1>
