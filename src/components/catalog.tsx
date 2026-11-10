@@ -755,8 +755,8 @@ export function CatalogScreen({ catalog, onNeedMore, initialQuery = "" }: { cata
         </nav>
         <SiteSearch discipline={catalog.id} query={query} onQuery={setQuery} />
         <nav className={menu ? "nav-links is-open" : "nav-links"} aria-label="Menu">
-          <button type="button" className="nav-link" onClick={() => go("home")}>
-            Home
+          <button type="button" className="nav-link nav-home" onClick={() => go("home")} aria-label="Home">
+            <img src="/media/nav-home.webp" alt="" />
           </button>
           <Link to="/about" className="nav-link" onClick={() => setMenu(false)}>
             About
