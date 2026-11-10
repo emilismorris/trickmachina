@@ -73,7 +73,7 @@ function Account() {
           Back
         </button>
       </p>
-      <h1 className="page-logo">{signedIn ? "Your list" : <img src="/media/nav-login-4.webp" alt="Log in" />}</h1>
+      <h1 className="page-logo">{signedIn ? "Your list" : <img src="/media/nav-login-bw3.webp" alt="Log in" />}</h1>
       {isPending && !signedIn ? null : signedIn ? (
         <>
           <p>Signed in as {user?.displayName || email}. Films you mark My list stay on this account.</p>
