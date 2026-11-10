@@ -53,7 +53,11 @@
   body {
     margin: 0;
     min-height: 100dvh;
-    background: #1a1612;
+    background-color: #1a1612;
+    background-image: linear-gradient(rgb(0 0 0 / 42%), rgb(0 0 0 / 42%)), url(/media/disciplines-lite.webp);
+    background-position: center, center 40%;
+    background-size: cover;
+    background-attachment: fixed;
     color: var(--color-fg);
     font-family: var(--font-sans);
     font-weight: 300;
