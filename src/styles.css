@@ -71,8 +71,8 @@
 .stack{z-index:1;height:100dvh;position:relative}
 .floor{z-index:2;flex-direction:column;align-items:center;gap:1.1rem;width:min(100%,48rem);padding:0 .75rem;display:flex;position:absolute;top:50%;left:50%;translate:-50% -50%}
 .site-foot{display:flex;flex-direction:column;align-items:center;gap:.45rem;background:#000;padding:2.75rem 1.25rem max(1.75rem, env(safe-area-inset-bottom))}
-.site-foot img{width:min(86vw,34rem);height:auto;display:block}
-.site-foot .foot-street{width:min(78vw,26rem)}
+.site-foot img{width:min(86vw,34rem);height:auto;display:block;opacity:1}
+.site-foot .foot-street{width:min(42vw,12rem)}
 .landing-foot img{width:auto;height:min(22vh,7.25rem);max-width:46vw;display:block}
 .archive-head{flex-direction:column;align-items:center;gap:.55rem;text-align:center;display:flex}
 .landing-head{z-index:3;position:absolute;top:0;right:0;left:0;justify-content:center;padding:max(.85rem,env(safe-area-inset-top)) 1rem 0;display:flex}
