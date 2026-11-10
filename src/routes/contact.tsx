@@ -51,7 +51,9 @@ function Contact() {
           Back
         </button>
       </p>
-      <h1>Contact</h1>
+      <h1 className="page-logo">
+        <img src="/media/nav-contact-4.webp" alt="Contact" />
+      </h1>
       <p>Write a note. It goes straight to Trick Machina.</p>
       {status === "sent" ? (
         <p>Sent.</p>

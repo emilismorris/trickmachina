@@ -42,10 +42,12 @@ function About() {
       </p>
 
       <header className="about-hero">
+        <h1 className="page-logo">
+          <img src="/media/nav-about-4.webp" alt="About" />
+        </h1>
         <p className="kicker">The free archive</p>
-        <h1>One shelf for the films</h1>
         <p className="about-lead">
-          {total.toLocaleString("en-US")} full lengths. {playable.toLocaleString("en-US")} playable. No dead links.
+          One shelf for the films. {total.toLocaleString("en-US")} full lengths. {playable.toLocaleString("en-US")} playable. No dead links.
         </p>
       </header>
 

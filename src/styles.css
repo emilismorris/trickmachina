@@ -105,6 +105,8 @@ to{opacity:1;translate:0}
 .page-back{color:#fff;gap:.25rem;letter-spacing:.08em;text-transform:uppercase;text-decoration:none;font:inherit;font-size:.78rem;background:0 0;border:0;padding:0;align-items:center;display:inline-flex;cursor:pointer}
 .page-back svg{width:1.15rem;height:1.15rem}
 .cookies h1{letter-spacing:.14em;text-transform:uppercase;font-size:1.35rem;font-weight:300}
+.page-logo{letter-spacing:0;text-transform:none;margin:.35rem 0 1rem}
+.page-logo img{width:min(92vw,16rem);height:auto;display:block}
 .cookies>p a{color:#fff}
 .cookies-clear{min-height:2.4rem;color:#000;font:inherit;background:#fff;border:0;padding:0 .8rem}
 .account-list{margin:1.1rem 0 0;padding:0;list-style:none}
