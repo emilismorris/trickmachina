@@ -82,7 +82,7 @@
 .site-foot{display:flex;flex-direction:column;align-items:center;gap:1rem;background:transparent;position:relative;z-index:3;padding:2.75rem 1.25rem max(1.75rem, env(safe-area-inset-bottom))}
 .site-foot img{width:min(86vw,34rem);height:auto;display:block;opacity:1}
 .site-foot .foot-archive{width:min(44vw,12rem)}
-.site-foot .foot-street{width:min(42vw,12rem);margin-bottom:-.65rem}
+.site-foot .foot-street{width:min(42vw,12rem);margin-bottom:-1.65rem}
 .landing-foot img{width:auto;height:min(22vh,7.25rem);max-width:46vw;display:block}
 .archive-head{flex-direction:column;align-items:center;gap:.55rem;text-align:center;display:flex}
 .landing-head{z-index:3;position:absolute;top:0;right:0;left:0;justify-content:center;padding:max(.85rem,env(safe-area-inset-top)) 1rem 0;display:flex}
