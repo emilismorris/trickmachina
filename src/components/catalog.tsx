@@ -99,7 +99,7 @@ function previewIds(shelf: { filmIds: string[]; previewIds?: string[] }) {
   return source.length > ROW_CAP ? source.slice(0, ROW_CAP) : source;
 }
 
-const MINUTE_MS = 60_000;
+const MINUTE_MS = 600_000;
 
 function minuteNumber(now = Date.now()) {
   return Math.floor(now / MINUTE_MS);
