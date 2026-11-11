@@ -99,7 +99,7 @@ function FilmPage() {
                   track("play", film.id);
                 }}
               >
-                <span>{index + 1}</span>
+                <span>{item.title === "Trailer" ? "•" : film.watch.parts.slice(0, index).filter((entry) => entry.title !== "Trailer").length + 1}</span>
                 {item.title}
               </button>
             </li>
