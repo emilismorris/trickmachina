@@ -553,7 +553,7 @@ export function CatalogScreen({ catalog, onNeedMore, initialQuery = "" }: { cata
     };
     const timer = window.setInterval(() => {
       setPicked((current) => pick(current?.id));
-    }, 10000);
+    }, 60000);
     return () => window.clearInterval(timer);
   }, [heroPool]);
 
