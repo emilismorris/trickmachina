@@ -42,7 +42,7 @@ function Cookies() {
         </button>
       </p>
       <h1 className="page-logo">
-        <img src="/media/nav-cookies-new.webp" alt="Cookies" />
+        <img src="/media/nav-cookies-match.webp" alt="Cookies" />
       </h1>
       <p>Trick Machina uses Google Analytics only, to count visits. We don’t set advertising cookies.</p>
       <p>
