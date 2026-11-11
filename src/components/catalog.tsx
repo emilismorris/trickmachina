@@ -99,10 +99,17 @@ function previewIds(shelf: { filmIds: string[]; previewIds?: string[] }) {
   return source.length > ROW_CAP ? source.slice(0, ROW_CAP) : source;
 }
 
-const DAY_MS = 86_400_000;
+const MINUTE_MS = 60_000;
 
-function dayNumber(now = Date.now()) {
-  return Math.floor(now / DAY_MS);
+function minuteNumber(now = Date.now()) {
+  return Math.floor(now / MINUTE_MS);
+}
+
+function filmForMinute(pool: Film[], minute: number) {
+  if (!pool.length) return null;
+  let hash = Math.imul(minute + 1, 374761393);
+  hash = Math.imul(hash ^ (hash >>> 13), 1274126177);
+  return pool[(hash >>> 0) % pool.length];
 }
 
 function mixKey(day: number, shelfId: string, filmId: string) {
@@ -534,33 +541,26 @@ export function CatalogScreen({ catalog, onNeedMore, initialQuery = "" }: { cata
   const [playing, setPlaying] = useState(false);
   const [limit, setLimit] = useState(PAGE);
   const [rowCount, setRowCount] = useState(8);
+  const [minute, setMinute] = useState(minuteNumber);
   const searchRef = useRef<HTMLInputElement>(null);
   const saved = useSaved(catalog);
   const more = useRef<HTMLDivElement>(null);
   const heroPool = useMemo(() => {
     const playable = Object.values(catalog.films).filter((film) => film.thumb && canPlay(film.watch));
-    return playable.length ? playable : Object.values(catalog.films).filter((film) => film.thumb);
+    const list = playable.length ? playable : Object.values(catalog.films).filter((film) => film.thumb);
+    return [...list].sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
   }, [catalog]);
-  const [picked, setPicked] = useState<Film | null>(null);
-  const hero = picked ?? catalog.films[catalog.featuredId] ?? heroPool[0] ?? null;
+  const hero = filmForMinute(heroPool, minute) ?? catalog.films[catalog.featuredId] ?? null;
 
   useEffect(() => {
-    if (heroPool.length < 2) return;
-    const pick = (avoid?: string) => {
-      let next = heroPool[Math.floor(Math.random() * heroPool.length)];
-      for (let i = 0; i < 8 && next.id === avoid; i += 1) next = heroPool[Math.floor(Math.random() * heroPool.length)];
-      return next;
-    };
-    const timer = window.setInterval(() => {
-      setPicked((current) => pick(current?.id));
-    }, 60000);
-    return () => window.clearInterval(timer);
-  }, [heroPool]);
+    const wait = MINUTE_MS - (Date.now() % MINUTE_MS) + 20;
+    const timer = window.setTimeout(() => setMinute(minuteNumber()), wait);
+    return () => window.clearTimeout(timer);
+  }, [minute]);
 
   useEffect(() => {
     setQuery(initialQuery);
     setRowCount(8);
-    setPicked(null);
   }, [catalog.id]);
 
   useEffect(() => {
