@@ -39,9 +39,8 @@ export function embedSrc(watch: Watch, part = 0) {
     if (!ids.length) return null;
     const start = Math.min(Math.max(part, 0), ids.length - 1);
     const ordered = [...ids.slice(start), ...ids.slice(0, start)];
-    const [first, ...rest] = ordered;
-    const playlist = rest.length ? `&playlist=${rest.join(",")}` : "";
-    return `https://www.youtube-nocookie.com/embed/${first}?rel=0&modestbranding=1&playsinline=1${playlist}`;
+    const first = ordered[0];
+    return `https://www.youtube-nocookie.com/embed/${first}?rel=0&modestbranding=1&playsinline=1&playlist=${ordered.join(",")}`;
   }
   if (watch.host === "vimeo") return `https://player.vimeo.com/video/${watch.id}`;
   if (watch.host === "archive") return `https://archive.org/embed/${watch.id}`;
