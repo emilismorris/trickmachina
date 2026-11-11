@@ -541,22 +541,18 @@ export function CatalogScreen({ catalog, onNeedMore, initialQuery = "" }: { cata
     const playable = Object.values(catalog.films).filter((film) => film.thumb && canPlay(film.watch));
     return playable.length ? playable : Object.values(catalog.films).filter((film) => film.thumb);
   }, [catalog]);
-  const [hero, setHero] = useState<Film | null>(null);
+  const [picked, setPicked] = useState<Film | null>(null);
+  const hero = picked ?? catalog.films[catalog.featuredId] ?? heroPool[0] ?? null;
 
   useEffect(() => {
-    if (!heroPool.length) {
-      setHero(null);
-      return;
-    }
-    const pick = () => heroPool[Math.floor(Math.random() * heroPool.length)];
-    setHero(pick());
+    if (heroPool.length < 2) return;
+    const pick = (avoid?: string) => {
+      let next = heroPool[Math.floor(Math.random() * heroPool.length)];
+      for (let i = 0; i < 8 && next.id === avoid; i += 1) next = heroPool[Math.floor(Math.random() * heroPool.length)];
+      return next;
+    };
     const timer = window.setInterval(() => {
-      setHero((current) => {
-        if (heroPool.length < 2) return pick();
-        let next = pick();
-        for (let i = 0; i < 8 && next.id === current?.id; i += 1) next = pick();
-        return next;
-      });
+      setPicked((current) => pick(current?.id));
     }, 10000);
     return () => window.clearInterval(timer);
   }, [heroPool]);
@@ -564,6 +560,7 @@ export function CatalogScreen({ catalog, onNeedMore, initialQuery = "" }: { cata
   useEffect(() => {
     setQuery(initialQuery);
     setRowCount(8);
+    setPicked(null);
   }, [catalog.id]);
 
   useEffect(() => {
