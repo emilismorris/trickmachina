@@ -521,7 +521,7 @@ function Player({ film }: { film: Film }) {
     <div className="player">
       {src ? <iframe className="player-frame" src={src} title={film.title} allow="autoplay; fullscreen; picture-in-picture" allowFullScreen referrerPolicy="strict-origin-when-cross-origin" /> : null}
       {watch.host === "parts" ? (
-        <ol className="playlist">
+        <div className="playlist">
           {watch.parts.map((item, index) => (
             <li key={item.id}>
               <button type="button" aria-current={index === part} onClick={() => setPart(index)}>
@@ -529,7 +529,7 @@ function Player({ film }: { film: Film }) {
               </button>
             </li>
           ))}
-        </ol>
+        </div>
       ) : null}
       {"credit" in watch && watch.credit ? <p className="quiet">{watch.credit}</p> : null}
     </div>

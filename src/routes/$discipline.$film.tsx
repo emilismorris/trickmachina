@@ -87,7 +87,7 @@ function FilmPage() {
         </button>
       ) : null}
       {film.watch.host === "parts" ? (
-        <ol className="playlist">
+        <div className="playlist">
           {film.watch.parts.map((item, index) => (
             <li key={item.id}>
               <button
@@ -103,7 +103,7 @@ function FilmPage() {
               </button>
             </li>
           ))}
-        </ol>
+        </div>
       ) : null}
       {outbound ? (
         <p>
