@@ -534,19 +534,32 @@ export function CatalogScreen({ catalog, onNeedMore, initialQuery = "" }: { cata
   const [playing, setPlaying] = useState(false);
   const [limit, setLimit] = useState(PAGE);
   const [rowCount, setRowCount] = useState(8);
-  const [day, setDay] = useState(dayNumber);
   const searchRef = useRef<HTMLInputElement>(null);
   const saved = useSaved(catalog);
   const more = useRef<HTMLDivElement>(null);
-
-  const heroId = catalog.heroIds.length ? catalog.heroIds[day % catalog.heroIds.length] : catalog.featuredId;
-  const hero = catalog.films[heroId] ?? catalog.films[catalog.featuredId];
+  const heroPool = useMemo(() => {
+    const playable = Object.values(catalog.films).filter((film) => film.thumb && canPlay(film.watch));
+    return playable.length ? playable : Object.values(catalog.films).filter((film) => film.thumb);
+  }, [catalog]);
+  const [hero, setHero] = useState<Film | null>(null);
 
   useEffect(() => {
-    const wait = DAY_MS - (Date.now() % DAY_MS) + 250;
-    const timer = window.setTimeout(() => setDay(dayNumber()), wait);
-    return () => window.clearTimeout(timer);
-  }, [day]);
+    if (!heroPool.length) {
+      setHero(null);
+      return;
+    }
+    const pick = () => heroPool[Math.floor(Math.random() * heroPool.length)];
+    setHero(pick());
+    const timer = window.setInterval(() => {
+      setHero((current) => {
+        if (heroPool.length < 2) return pick();
+        let next = pick();
+        for (let i = 0; i < 8 && next.id === current?.id; i += 1) next = pick();
+        return next;
+      });
+    }, 10000);
+    return () => window.clearInterval(timer);
+  }, [heroPool]);
 
   useEffect(() => {
     setQuery(initialQuery);
