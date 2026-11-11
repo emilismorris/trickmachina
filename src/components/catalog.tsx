@@ -129,8 +129,13 @@ function embedSrc(watch: Watch, part = 0) {
   if (watch.host === "youtube") return `https://www.youtube-nocookie.com/embed/${watch.id}?autoplay=1&rel=0&modestbranding=1&playsinline=1`;
   if (watch.host === "youtube-list") return `https://www.youtube-nocookie.com/embed/videoseries?list=${watch.id}&autoplay=1&rel=0`;
   if (watch.host === "parts") {
-    const id = watch.parts[part]?.id ?? watch.parts[0]?.id;
-    return id ? `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&modestbranding=1&playsinline=1` : null;
+    const ids = watch.parts.map((item) => item.id).filter(Boolean);
+    if (!ids.length) return null;
+    const start = Math.min(Math.max(part, 0), ids.length - 1);
+    const ordered = [...ids.slice(start), ...ids.slice(0, start)];
+    const [first, ...rest] = ordered;
+    const playlist = rest.length ? `&playlist=${rest.join(",")}` : "";
+    return `https://www.youtube-nocookie.com/embed/${first}?autoplay=1&rel=0&modestbranding=1&playsinline=1${playlist}`;
   }
   if (watch.host === "vimeo") return `https://player.vimeo.com/video/${watch.id}?autoplay=1`;
   if (watch.host === "archive") return `https://archive.org/embed/${watch.id}`;

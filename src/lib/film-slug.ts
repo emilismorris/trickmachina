@@ -35,8 +35,11 @@ export function embedSrc(watch: Watch) {
   if (watch.host === "youtube") return `https://www.youtube-nocookie.com/embed/${watch.id}?rel=0&modestbranding=1&playsinline=1`;
   if (watch.host === "youtube-list") return `https://www.youtube-nocookie.com/embed/videoseries?list=${watch.id}&rel=0`;
   if (watch.host === "parts") {
-    const id = watch.parts[0]?.id;
-    return id ? `https://www.youtube-nocookie.com/embed/${id}?rel=0&modestbranding=1&playsinline=1` : null;
+    const ids = watch.parts.map((item) => item.id).filter(Boolean);
+    if (!ids.length) return null;
+    const [first, ...rest] = ids;
+    const playlist = rest.length ? `&playlist=${rest.join(",")}` : "";
+    return `https://www.youtube-nocookie.com/embed/${first}?rel=0&modestbranding=1&playsinline=1${playlist}`;
   }
   if (watch.host === "vimeo") return `https://player.vimeo.com/video/${watch.id}`;
   if (watch.host === "archive") return `https://archive.org/embed/${watch.id}`;
