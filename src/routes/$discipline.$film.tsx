@@ -35,7 +35,8 @@ export const Route = createFileRoute("/$discipline/$film")({
 function FilmPage() {
   const { discipline, film, slug } = Route.useLoaderData();
   const [playing, setPlaying] = useState(false);
-  const src = embedSrc(film.watch);
+  const [part, setPart] = useState(0);
+  const src = embedSrc(film.watch, part);
   const outbound = watchPageUrl(film.watch);
   const description = film.blurb || `${film.title} from ${film.company || discipline}.`;
 
@@ -84,6 +85,26 @@ function FilmPage() {
         >
           Play
         </button>
+      ) : null}
+      {film.watch.host === "parts" ? (
+        <ol className="playlist">
+          {film.watch.parts.map((item, index) => (
+            <li key={item.id}>
+              <button
+                type="button"
+                aria-current={playing && index === part}
+                onClick={() => {
+                  setPart(index);
+                  setPlaying(true);
+                  track("play", film.id);
+                }}
+              >
+                <span>{index + 1}</span>
+                {item.title}
+              </button>
+            </li>
+          ))}
+        </ol>
       ) : null}
       {outbound ? (
         <p>

@@ -519,16 +519,19 @@ function Player({ film }: { film: Film }) {
   const src = embedSrc(watch, part);
   return (
     <div className="player">
-      {watch.host === "parts" ? (
-        <div className="parts" role="tablist" aria-label="Parts">
-          {watch.parts.map((item, index) => (
-            <button key={item.id} type="button" role="tab" aria-selected={index === part} onClick={() => setPart(index)}>
-              {item.title}
-            </button>
-          ))}
-        </div>
-      ) : null}
       {src ? <iframe className="player-frame" src={src} title={film.title} allow="autoplay; fullscreen; picture-in-picture" allowFullScreen referrerPolicy="strict-origin-when-cross-origin" /> : null}
+      {watch.host === "parts" ? (
+        <ol className="playlist">
+          {watch.parts.map((item, index) => (
+            <li key={item.id}>
+              <button type="button" aria-current={index === part} onClick={() => setPart(index)}>
+                <span>{index + 1}</span>
+                {item.title}
+              </button>
+            </li>
+          ))}
+        </ol>
+      ) : null}
       {"credit" in watch && watch.credit ? <p className="quiet">{watch.credit}</p> : null}
     </div>
   );

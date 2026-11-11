@@ -31,13 +31,15 @@ export function watchPageUrl(watch: Watch) {
   return "";
 }
 
-export function embedSrc(watch: Watch) {
+export function embedSrc(watch: Watch, part = 0) {
   if (watch.host === "youtube") return `https://www.youtube-nocookie.com/embed/${watch.id}?rel=0&modestbranding=1&playsinline=1`;
   if (watch.host === "youtube-list") return `https://www.youtube-nocookie.com/embed/videoseries?list=${watch.id}&rel=0`;
   if (watch.host === "parts") {
     const ids = watch.parts.map((item) => item.id).filter(Boolean);
     if (!ids.length) return null;
-    const [first, ...rest] = ids;
+    const start = Math.min(Math.max(part, 0), ids.length - 1);
+    const ordered = [...ids.slice(start), ...ids.slice(0, start)];
+    const [first, ...rest] = ordered;
     const playlist = rest.length ? `&playlist=${rest.join(",")}` : "";
     return `https://www.youtube-nocookie.com/embed/${first}?rel=0&modestbranding=1&playsinline=1${playlist}`;
   }
