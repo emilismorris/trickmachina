@@ -525,7 +525,6 @@ function Player({ film }: { film: Film }) {
           {watch.parts.map((item, index) => (
             <li key={item.id}>
               <button type="button" aria-current={index === part} onClick={() => setPart(index)}>
-                <span>{item.title === "Trailer" ? "•" : watch.parts.slice(0, index).filter((entry) => entry.title !== "Trailer").length + 1}</span>
                 {item.title}
               </button>
             </li>
