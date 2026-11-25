@@ -170,9 +170,9 @@ to{opacity:1;translate:0}
 .topnav{z-index:20;background:#000000b8;align-items:stretch;flex-direction:column;gap:.2rem;min-height:4.25rem;max-width:100%;padding:.4rem max(1rem, env(safe-area-inset-right)) .45rem max(1.1rem, env(safe-area-inset-left));display:flex;position:sticky;top:0}
 .brand-wrap{position:relative;z-index:1;align-items:center;justify-content:center;min-height:2.75rem;display:flex}
 .brand-wrap .menu-btn{position:absolute;left:0;top:50%;translate:0 -50%;z-index:3}
-.brand-stack{width:min(78vw,26rem);margin-left:1.5rem;align-items:center;gap:.05rem;display:flex;flex-direction:column;pointer-events:none}
+.brand-stack{width:min(78vw,26rem);margin-left:1.5rem;align-items:center;gap:0;display:flex;flex-direction:column;pointer-events:none}
 .brand-mark{width:100%;height:auto;display:block}
-.brand-line{width:auto;margin:0;display:flex;justify-content:center}
+.brand-line{width:auto;margin:-.7rem 0 0;display:flex;justify-content:center}
 .brand-line img{width:auto;height:4.2rem;display:block}
 .topnav.is-solid{border-bottom:1px solid var(--color-line);background:#000000c4}
 .catalog[data-id=bmx] .topnav.is-solid{background:#000000c4}
